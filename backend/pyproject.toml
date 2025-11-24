@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = "Trainytics API - Paginación de datos para análisis de entrenamiento"
+authors = ["FueguitoOutzz <renatochavezz10@gmail.com>"]
+readme = "README.md"
+packages = [{include = "app", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+uvicorn = ">=0.38.0,<0.39.0"
+fastapi = ">=0.121.3,<0.122.0"
+sqlalchemy = ">=2.0.44,<3.0.0"
+sqlmodel = ">=0.0.27,<0.0.28"
+asyncpg = ">=0.30.0,<0.31.0"
+psycopg2-binary = ">=2.9.11,<3.0.0"
+alembic = "^1.17.2"
+
+[tool.poetry.scripts]
+start = "app.main:start"
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
