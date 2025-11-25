@@ -5,7 +5,7 @@ from app.config import db
 def init_app():
     db.init()
     
-    app = FastAPI(title = "Trainytics API", description = "Paginación de datos para análisis de entrenamiento", version="1.0.0")
+    app = FastAPI(title = "Trainylics API", description = "Paginación de datos para análisis de entrenamiento", version="1.0.0")
     
     @app.on_event("startup")
     async def startup():
