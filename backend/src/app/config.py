@@ -5,6 +5,10 @@ from sqlmodel import SQLModel
 DB_CONFIG = f"postgresql+asyncpg://postgres:123456@localhost:5432/trainylics"
 
 
+SECRET_KEY = "Mizuto10"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 class AsyncDatabaseSession:
 
     def __init__(self) -> None:

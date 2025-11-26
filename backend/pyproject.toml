@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "backend"
 version = "0.1.0"
-description = "Trainytics API - Paginación de datos para análisis de entrenamiento"
+description = "Trainylics API - Paginación de datos para análisis de entrenamiento"
 authors = ["FueguitoOutzz <renatochavezz10@gmail.com>"]
 readme = "README.md"
 packages = [{include = "app", from = "src"}]
@@ -15,6 +15,8 @@ sqlmodel = ">=0.0.27,<0.0.28"
 asyncpg = ">=0.30.0,<0.31.0"
 psycopg2-binary = ">=2.9.11,<3.0.0"
 alembic = "^1.17.2"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.scripts]
 start = "app.main:start"
