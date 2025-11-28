@@ -17,18 +17,18 @@ export default function Register(){
 
   return (
     <form onSubmit={submit} style={{display:'grid', gap:8}}>
-      <h2>Register</h2>
-      <input placeholder="username" value={form.username} onChange={e=>setForm({...form, username:e.target.value})} />
-      <input placeholder="email" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} />
-      <input placeholder="name" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} />
-      <input placeholder="password" type="password" value={form.password} onChange={e=>setForm({...form, password:e.target.value})} />
-      <input placeholder="phone +56 9 ..." value={form.phone_number} onChange={e=>setForm({...form, phone_number:e.target.value})} />
-      <input placeholder="birth dd-mm-YYYY" value={form.birth} onChange={e=>setForm({...form, birth:e.target.value})} />
+      <h2>Registro</h2>
+      <input placeholder="Nombre de Usuario" value={form.username} onChange={e=>setForm({...form, username:e.target.value})} />
+      <input placeholder="Correo Electrónico" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} />
+      <input placeholder="Nombre" value={form.name} onChange={e=>setForm({...form, name:e.target.value})} />
+      <input placeholder="Contraseña" type="password" value={form.password} onChange={e=>setForm({...form, password:e.target.value})} />
+      <input placeholder="Teléfono +56 9 ..." value={form.phone_number} onChange={e=>setForm({...form, phone_number:e.target.value})} />
+      <input placeholder="Fecha de Nacimiento dd-mm-YYYY" value={form.birth} onChange={e=>setForm({...form, birth:e.target.value})} />
       <select value={form.sex} onChange={e=>setForm({...form, sex:e.target.value})}>
-        <option value="MALE">MALE</option>
-        <option value="FEMALE">FEMALE</option>
+        <option value="MALE">Masculino</option>
+        <option value="FEMALE">Femenino</option>
       </select>
-      <button type="submit">Register</button>
+      <button type="submit">Registrar</button>
       <div>{msg}</div>
     </form>
   )
