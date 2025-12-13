@@ -16,4 +16,5 @@ class UsersService:
                     Person.sex,
                     Person.profile,
                     Person.phone_number).join(Person).where(Users.id == user_id)
-        return (await UsersRepo.execute(query)).mappings().one()
+        row = (await UsersRepo.execute(query)).mappings().one()
+        return dict(row)

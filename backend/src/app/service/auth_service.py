@@ -14,7 +14,8 @@ from app.repository.users import UsersRepo
 from app.repository.user_role import UsersRoleRepo
 from app.repository.auth_repo import JWTRepo
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use bcrypt_sha256 to avoid the 72-byte password length limit of raw bcrypt
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 class AuthService:
     

@@ -24,16 +24,16 @@ class RegisterSchema(BaseModel):
     
     @validator('phone_number')
     def validate_phone_number(cls, v):
-        # Telefono chileno: +56 9 XXXX XXXX
-        if not v.startswith('+56 9') or len(v) != 13 or not v[5:].replace(' ', '').isdigit():
-            raise ValueError('Número de teléfono inválido, intentar con formato +56 9 XXXX XXXX')
+        # Telefono chileno: +569XXXXXXXX
+        if not v.startswith("+569") or len(v) != 12 or not v[1:].isdigit():
+            raise HTTPException(status_code=400, detail="Número de teléfono inválido. Debe comenzar con +569 y tener 12 dígitos.")
         return v
     
     @validator('sex')
     def sex_validation(cls, v):
         # Accept values defined by the Sex enum
         if v not in {member.value for member in Sex}:
-            raise HTTPException(status_code=400, detail="Sexo inválido, usar MALE o FEMALE.")
+            raise HTTPException(status_code=400, detail="Sexo inválido, usar Hombre o Mujer.")
         return v
     
     
