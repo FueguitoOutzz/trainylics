@@ -21,9 +21,9 @@ export default function Login(){
   return (
     <form onSubmit={submit} style={{display:'grid', gap:8}}>
       <h2>Login</h2>
-      <input placeholder="username" value={username} onChange={e=>setUsername(e.target.value)} />
-      <input placeholder="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
-      <button type="submit">Login</button>
+      <input placeholder="Nombre de Usuario" value={username} onChange={e=>setUsername(e.target.value)} />
+      <input placeholder="Contraseña" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+      <button type="submit">Iniciar Sesión</button>
       <div>{message}</div>
     </form>
   )

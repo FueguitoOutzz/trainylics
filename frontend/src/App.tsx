@@ -7,7 +7,7 @@ export default function App(){
       <header>
         <h1>Trainytics</h1>
         <nav>
-          <Link to="/">Login</Link> | <Link to="/register">Register</Link> | <Link to="/admin/users">Admin</Link>
+          <Link to="/">Login</Link> | <Link to="/register">Registro</Link> | <Link to="/admin/users">Admin</Link>
         </nav>
       </header>
       <main>
