@@ -18,9 +18,14 @@ from app.model.users import Users
 from app.model.person import Person
 from app.model.role import Role
 from app.model.user_role import UsersRole
+from app.config import DB_CONFIG
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Overwrite sqlalchemy.url with the one from app.config
+config.set_main_option("sqlalchemy.url", DB_CONFIG)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

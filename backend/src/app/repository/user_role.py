@@ -10,7 +10,7 @@ class UsersRoleRepo(BaseRepo):
 
     @classmethod
     async def assign_role(cls, users_id: str, role_id: str):
-        # convenience wrapper to create a user-role association
+        
         return await cls.create(users_id=users_id, role_id=role_id)
 
     @staticmethod

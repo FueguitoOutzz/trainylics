@@ -14,7 +14,8 @@ from app.repository.users import UsersRepo
 from app.repository.user_role import UsersRoleRepo
 from app.repository.auth_repo import JWTRepo
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use bcrypt_sha256 to avoid the 72-byte password length limit of raw bcrypt
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 class AuthService:
     
@@ -45,7 +46,6 @@ class AuthService:
                     person_id=_person_id)
         
         _role = await RoleRepo.find_by_role_name("user")
-        # RoleRepo.find_by_role_name returns a single Role or None
         if not _role:
             raise HTTPException(status_code=500, detail="Default role 'user' not found")
         _users_role = UsersRole(users_id=_users_id, role_id=_role.id)
@@ -60,7 +60,6 @@ class AuthService:
         else:
             await PersonRepo.create(**_person.dict())
             await UsersRepo.create(**_users.dict())
-            # use assign_role convenience method
             await UsersRoleRepo.assign_role(users_id=_users_id, role_id=_role.id)
             
     @staticmethod
@@ -78,10 +77,15 @@ class AuthService:
         if not _email:
             raise HTTPException(status_code=400, detail="El correo electrónico no está registrado.")
         await UsersRepo.update_password(_email.id, pwd_context.hash(forgot_password.new_password))
+
+    @staticmethod
+    async def logout_service():
+        # En una implementación stateless con JWT, el logout suele ser manejado por el cliente eliminando el token.
+        # Aquí se dejaría espacio para lógica de lista negra de tokens (blacklist) si se implementara a futuro.
+        pass
         
 
 async def generate_role():
-    # Añadir los roles mínimos del sistema. Incluir 'scouter' y 'user' por defecto.
     roles = ["entrenador", "admin", "scouter", "user"]
     for role_name in roles:
         existing_role = await RoleRepo.find_by_role_name(role_name)
