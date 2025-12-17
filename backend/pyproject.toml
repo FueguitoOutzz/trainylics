@@ -18,6 +18,8 @@ alembic = "^1.17.2"
 python-jose = {extras = ["cryptography"], version = "^3.5.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-dotenv = "^1.0.1"
+pandas = "^2.2.0"
+scikit-learn = "^1.4.0"
 
 [tool.poetry.scripts]
 start = "app.main:start"

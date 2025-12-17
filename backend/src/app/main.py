@@ -9,7 +9,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import db
 from app.service.auth_service import generate_role
-from app.controller import authentication, users, admin
+from app.controller import authentication, users, admin, prediction
 
 
 def init_app():
@@ -38,6 +38,7 @@ def init_app():
     app.include_router(authentication.router)
     app.include_router(users.router)
     app.include_router(admin.router)
+    app.include_router(prediction.router)
     
     return app
 

@@ -5,4 +5,9 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
+export const predictMatch = async (stats: any) => {
+  const response = await api.post('/predict/', stats)
+  return response.data
+}
+
 export default api

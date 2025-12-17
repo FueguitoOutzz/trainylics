@@ -18,10 +18,14 @@ cd backend
 # 2. (Nuevo) Asegurar que existe el archivo .env en la raíz del proyecto
 # El backend ahora lee las variables de entorno desde ahí.
 
-# 3. Configurar el path (importante para que encuentre los módulos)
+# 3. Instalar Dependencias (Importante: Nuevas librerías añadidas)
+# Si te da error "ModuleNotFoundError: No module named 'pandas'", ejecuta:
+.\venv\Scripts\pip install python-dotenv pandas scikit-learn asyncpg
+
+# 4. Configurar el path (importante para que encuentre los módulos)
 $env:PYTHONPATH="src"
 
-# 3. Ejecutar el servidor con Uvicorn
+# 5. Ejecutar el servidor con Uvicorn
 .\venv\Scripts\python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 *Deberías ver un mensaje indicando que el servidor está corriendo en http://127.0.0.1:8000.*

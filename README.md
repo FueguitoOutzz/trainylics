@@ -1,6 +1,6 @@
 # Trainylics
 
-Plataforma de análisis de entrenamiento con paginación de datos.
+Plataforma de análisis de entrenamiento con paginación de datos e Inteligencia Artificial para predicción de partidos.
 
 ## 🚀 Inicio Rápido con Docker (Recomendado)
 
