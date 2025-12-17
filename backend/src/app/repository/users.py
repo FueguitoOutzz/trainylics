@@ -25,3 +25,8 @@ class UsersRepo(BaseRepo):
         query = sql_update(Users).where(Users.id == user_id).values(password=password).execution_options(synchronize_session="fetch")
         await db.execute(query)
         await commit_session()
+
+    @staticmethod
+    async def execute(query):
+        # Convenience wrapper to execute arbitrary select queries
+        return await db.execute(query)
