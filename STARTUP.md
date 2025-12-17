@@ -15,7 +15,10 @@ Abre una **nueva terminal** (Terminal 1) y ejecuta:
 # 1. Navegar a la carpeta del backend
 cd backend
 
-# 2. Configurar el path (importante para que encuentre los módulos)
+# 2. (Nuevo) Asegurar que existe el archivo .env en la raíz del proyecto
+# El backend ahora lee las variables de entorno desde ahí.
+
+# 3. Configurar el path (importante para que encuentre los módulos)
 $env:PYTHONPATH="src"
 
 # 3. Ejecutar el servidor con Uvicorn
