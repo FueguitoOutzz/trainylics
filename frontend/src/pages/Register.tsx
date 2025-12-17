@@ -43,7 +43,7 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="username">Usuario</Label>
-                <Input placeholder="mizu" required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
+                <Input placeholder="tecnico" required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="name">Nombre</Label>
@@ -53,7 +53,7 @@ export default function Register() {
 
             <div className="grid gap-2">
               <Label htmlFor="email">Correo Electrónico</Label>
-              <Input type="email" placeholder="m@example.com" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+              <Input type="email" placeholder="tecnico@gmail.com" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             </div>
 
             <div className="grid gap-2">
@@ -64,10 +64,10 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="phone">Teléfono</Label>
-                <Input placeholder="+56 9 ..." required value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} />
+                <Input placeholder="+56912345678" required value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="birth">Fecha Nacimiento</Label>
+                <Label htmlFor="birth">Fecha de Nacimiento</Label>
                 <Input placeholder="dd-mm-YYYY" required value={form.birth} onChange={e => setForm({ ...form, birth: e.target.value })} />
               </div>
             </div>

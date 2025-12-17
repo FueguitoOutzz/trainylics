@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "8000:8000"
+      - "3000:8000"
     env_file:
       - .env
     container_name: trainylics-backend
@@ -14,6 +14,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
     ports:
       - "80:80"
     container_name: trainylics-frontend

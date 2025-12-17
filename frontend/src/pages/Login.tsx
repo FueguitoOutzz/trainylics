@@ -49,7 +49,7 @@ export default function Login() {
               <Label htmlFor="username">Usuario</Label>
               <Input
                 id="username"
-                placeholder="mizu"
+                placeholder=""
                 required
                 value={username}
                 onChange={e => setUsername(e.target.value)}
