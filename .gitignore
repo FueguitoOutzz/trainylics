@@ -17,3 +17,10 @@ env/
 
 *.so
 .pytest_cache/
+
+# Local Env Files
+.env
+.env.*
+
+# Vite Junk
+vite.config.ts.timestamp*
