@@ -53,3 +53,7 @@ class DetailSchema(BaseModel):
 class ResponseSchema(BaseModel):
     detail: str
     result: Optional[T] = None
+
+class PromoteSchema(BaseModel):
+    username: str
+    role_name: str

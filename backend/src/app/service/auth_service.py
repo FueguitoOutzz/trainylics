@@ -21,46 +21,52 @@ class AuthService:
     
     @staticmethod
     async def register_service(register:RegisterSchema):
+        try:
         
-        _person_id = str(uuid4())
-        _user_id = str(uuid4())
+            _person_id = str(uuid4())
+            _user_id = str(uuid4())
+            
+            birth_date = datetime.strptime(register.birth, "%d-%m-%Y").date()
+            
+            # Cargar imagen por defecto
+            with open("media/profile.png", "rb") as f:
+                image_str = base64.b64encode(f.read())
+            imagen_str = "data:image/png;base64," + image_str.decode('utf-8')
+            
+            _person = Person(id=_person_id,
+                            name=register.name,
+                            birth=birth_date,
+                            sex=register.sex,
+                            profile=imagen_str,
+                            phone_number=register.phone_number)
+            
+            _user = User(id=_user_id,
+                        username=register.username,
+                        email=register.email,
+                        password=pwd_context.hash(register.password),
+                        person_id=_person_id)
+            
+            _role = await RoleRepo.find_by_role_name("user")
+            if not _role:
+                raise HTTPException(status_code=500, detail="Default role 'user' not found")
+            _user_role = UserRole(user_id=_user_id, role_id=_role.id)
         
-        birth_date = datetime.strptime(register.birth, "%d-%m-%Y").date()
-        
-        # Cargar imagen por defecto
-        with open("media/profile.png", "rb") as f:
-            image_str = base64.b64encode(f.read())
-        imagen_str = "data:image/png;base64," + image_str.decode('utf-8')
-        
-        _person = Person(id=_person_id,
-                        name=register.name,
-                        birth=birth_date,
-                        sex=register.sex,
-                        profile=imagen_str,
-                        phone_number=register.phone_number)
-        
-        _user = User(id=_user_id,
-                    username=register.username,
-                    email=register.email,
-                    password=pwd_context.hash(register.password),
-                    person_id=_person_id)
-        
-        _role = await RoleRepo.find_by_role_name("user")
-        if not _role:
-            raise HTTPException(status_code=500, detail="Default role 'user' not found")
-        _user_role = UserRole(user_id=_user_id, role_id=_role.id)
-        
-        _username = await UserRepo.find_by_username(register.username)
-        if _username:
-            raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
-        
-        _email = await UserRepo.find_by_email(register.email)
-        if _email:
-            raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
-        else:
-            await PersonRepo.create(**_person.dict())
-            await UserRepo.create(**_user.dict())
-            await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
+            _username = await UserRepo.find_by_username(register.username)
+            if _username:
+                raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
+            
+            _email = await UserRepo.find_by_email(register.email)
+            if _email:
+                raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
+            else:
+                await PersonRepo.create(**_person.dict())
+                await UserRepo.create(**_user.dict())
+                await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
+        except Exception as e:
+            import traceback
+            import sys
+            traceback.print_exc(file=sys.stderr)
+            raise HTTPException(status_code=500, detail=f"INTERNAL ERROR: {str(e)}")
             
     @staticmethod
     async def login_service(login: LoginSchema):

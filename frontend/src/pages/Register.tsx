@@ -43,17 +43,17 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="username">Usuario</Label>
-                <Input placeholder="mizu" required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
+                <Input placeholder="" required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="name">Nombre</Label>
-                <Input placeholder="Tu Nombre" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                <Input placeholder="" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
               </div>
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="email">Correo Electrónico</Label>
-              <Input type="email" placeholder="m@example.com" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+              <Input type="email" placeholder="m@gmail.com" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             </div>
 
             <div className="grid gap-2">
