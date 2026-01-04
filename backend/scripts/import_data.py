@@ -12,12 +12,26 @@ from app.config import db
 from app.model.league import League
 from app.model.team import Team
 from app.model.match import Match
+from app.model.match import Match
 from app.model.user import User
+from app.model.note import Note
+from app.model.player import Player
 
 async def import_data():
     print("Initializing database...")
-    await db.init()
+    db.init()  # Fixed: init is synchronous, do not await
     
+    # Helper to safely convert to int or float, handling NaN/None
+    def safe_int(val):
+        if pd.isna(val) or val == "":
+            return None
+        return int(float(val))
+
+    def safe_float(val):
+        if pd.isna(val) or val == "":
+            return None
+        return float(val)
+
     async with db.session as session:
         # Check League
         print("Checking League...")
@@ -49,8 +63,7 @@ async def import_data():
         
         team_map = {} # name -> id
         
-        # Check existing teams in this league (or globals if teams are shared? For now assume league specific or global name check)
-        # We check by name globally
+        # Check existing teams by name
         res = await session.execute(select(Team).where(Team.name.in_(teams)))
         existing_teams = res.scalars().all()
         for t in existing_teams:
@@ -93,18 +106,17 @@ async def import_data():
                 round=int(row['Jornada']),
                 home_goals=int(row['Goles_Local']),
                 away_goals=int(row['Goles_Visitante']),
-                possession_home=float(row['Posesion_Local']),
-                possession_away=float(row['Posesion_Visitante']),
-                shots_home=int(row['Disparos_Totales_Local']),
-                shots_away=int(row['Disparos_Totales_Visitante']),
-                shots_on_target_home=int(row['Disparos_a_Puerta_Local']),
-                shots_on_target_away=int(row['Disparos_a_Puerta_Visitante']),
-                corners_home=int(row['Corners_Local']),
-                corners_away=int(row['Corners_Visitante']),
+                possession_home=safe_float(row['Posesion_Local']),
+                possession_away=safe_float(row['Posesion_Visitante']),
+                shots_home=safe_int(row['Disparos_Totales_Local']),
+                shots_away=safe_int(row['Disparos_Totales_Visitante']),
+                shots_on_target_home=safe_int(row['Disparos_a_Puerta_Local']),
+                shots_on_target_away=safe_int(row['Disparos_a_Puerta_Visitante']),
+                corners_home=safe_int(row['Corners_Local']),
+                corners_away=safe_int(row['Corners_Visitante']),
                 league_id=league_id,
                 home_team_id=home_team_id,
-                away_team_id=away_team_id,
-                status="Finalizado"
+                away_team_id=away_team_id
             )
             session.add(match)
             new_matches_count += 1
