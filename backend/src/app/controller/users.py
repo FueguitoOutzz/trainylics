@@ -8,7 +8,7 @@ from app.service.users import UserService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("/", response_model=ResponseSchema)
+@router.get("/", response_model=ResponseSchema)
 async def get_user_profile_controller(token: str = Depends(JWTbearer())):
     """Obtiene el perfil del usuario autenticado usando el token JWT."""
     payload = JWTRepo.extract_token(token)
