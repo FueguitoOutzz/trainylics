@@ -6,12 +6,12 @@ from fastapi import HTTPException
 from passlib.context import CryptContext
 from app.schema import ForgotPasswordSchema, LoginSchema, RegisterSchema
 from app.model.person import Person
-from app.model.users import Users
-from app.model.user_role import UsersRole
+from app.model.user import User
+from app.model.user_role import UserRole
 from app.repository.person import PersonRepo
 from app.repository.role import RoleRepo
-from app.repository.users import UsersRepo
-from app.repository.user_role import UsersRoleRepo
+from app.repository.users import UserRepo
+from app.repository.user_role import UserRoleRepo
 from app.repository.auth_repo import JWTRepo
 
 # Use bcrypt_sha256 to avoid the 72-byte password length limit of raw bcrypt
@@ -23,7 +23,7 @@ class AuthService:
     async def register_service(register:RegisterSchema):
         
         _person_id = str(uuid4())
-        _users_id = str(uuid4())
+        _user_id = str(uuid4())
         
         birth_date = datetime.strptime(register.birth, "%d-%m-%Y").date()
         
@@ -39,7 +39,7 @@ class AuthService:
                         profile=imagen_str,
                         phone_number=register.phone_number)
         
-        _users = Users(id=_users_id,
+        _user = User(id=_user_id,
                     username=register.username,
                     email=register.email,
                     password=pwd_context.hash(register.password),
@@ -48,23 +48,23 @@ class AuthService:
         _role = await RoleRepo.find_by_role_name("user")
         if not _role:
             raise HTTPException(status_code=500, detail="Default role 'user' not found")
-        _users_role = UsersRole(users_id=_users_id, role_id=_role.id)
+        _user_role = UserRole(user_id=_user_id, role_id=_role.id)
         
-        _username = await UsersRepo.find_by_username(register.username)
+        _username = await UserRepo.find_by_username(register.username)
         if _username:
             raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
         
-        _email = await UsersRepo.find_by_email(register.email)
+        _email = await UserRepo.find_by_email(register.email)
         if _email:
             raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
         else:
             await PersonRepo.create(**_person.dict())
-            await UsersRepo.create(**_users.dict())
-            await UsersRoleRepo.assign_role(users_id=_users_id, role_id=_role.id)
+            await UserRepo.create(**_user.dict())
+            await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
             
     @staticmethod
     async def login_service(login: LoginSchema):
-        _username = await UsersRepo.find_by_username(login.username)
+        _username = await UserRepo.find_by_username(login.username)
         if not _username:
             raise HTTPException(status_code=400, detail="Nombre de usuario incorrecta.")
         if not pwd_context.verify(login.password, _username.password):
@@ -73,10 +73,10 @@ class AuthService:
     
     @staticmethod
     async def forgot_password_service(forgot_password: ForgotPasswordSchema):
-        _email = await UsersRepo.find_by_email(forgot_password.email)
+        _email = await UserRepo.find_by_email(forgot_password.email)
         if not _email:
             raise HTTPException(status_code=400, detail="El correo electrónico no está registrado.")
-        await UsersRepo.update_password(_email.id, pwd_context.hash(forgot_password.new_password))
+        await UserRepo.update_password(_email.id, pwd_context.hash(forgot_password.new_password))
 
     @staticmethod
     async def logout_service():

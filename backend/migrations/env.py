@@ -14,10 +14,15 @@ from alembic import context
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
-from app.model.users import Users
+from app.model.user import User
 from app.model.person import Person
 from app.model.role import Role
-from app.model.user_role import UsersRole
+from app.model.user_role import UserRole
+from app.model.league import League
+from app.model.team import Team
+from app.model.match import Match
+from app.model.player import Player
+from app.model.note import Note
 from app.config import DB_CONFIG
 
 # this is the Alembic Config object, which provides
@@ -83,6 +88,7 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"ssl": False},
     )
 
     async with connectable.connect() as connection:

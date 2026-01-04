@@ -21,7 +21,7 @@ class AsyncDatabaseSession:
         return getattr(self.session,name)
 
     def init(self):
-        self.engine = create_async_engine(DB_CONFIG,future=True, echo=True)
+        self.engine = create_async_engine(DB_CONFIG, future=True, echo=True, connect_args={"ssl": False})
         self.session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)()
 
     async def create_all(self):

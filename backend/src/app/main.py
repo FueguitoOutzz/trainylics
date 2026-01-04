@@ -9,6 +9,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import db
 from app.service.auth_service import generate_role
+from app.model.note import Note
 from app.controller import authentication, users, admin, prediction
 
 

@@ -1,20 +1,21 @@
 
 
 from sqlalchemy import select
-from app.model.users import Users
-from app.repository.users import UsersRepo
+from sqlalchemy import select
+from app.model.user import User
+from app.repository.users import UserRepo
 from app.model.person import Person
 
 
-class UsersService:
+class UserService:
     
     @staticmethod
     async def get_user_profile(user_id: str):
-        query = select(Users.username, Users.email,
+        query = select(User.username, User.email,
                     Person.name,
                     Person.birth,
                     Person.sex,
                     Person.profile,
-                    Person.phone_number).join(Person).where(Users.id == user_id)
-        row = (await UsersRepo.execute(query)).mappings().one()
+                    Person.phone_number).join(Person).where(User.id == user_id)
+        row = (await UserRepo.execute(query)).mappings().one()
         return dict(row)

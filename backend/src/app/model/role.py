@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import uuid4
 from sqlmodel import Relationship, SQLModel, Field
 from app.model.mixins import TimeMixin
-from app.model.user_role import UsersRole
+from app.model.user_role import UserRole
 
 
 class Role(SQLModel, TimeMixin, table=True):
@@ -11,4 +11,4 @@ class Role(SQLModel, TimeMixin, table=True):
     id: Optional[str] = Field(default_factory=lambda: str(uuid4()), primary_key=True, nullable=False)
     role_name: str
 
-    users: List["Users"] = Relationship(back_populates="roles", link_model=UsersRole)
+    users: List["User"] = Relationship(back_populates="roles", link_model=UserRole)

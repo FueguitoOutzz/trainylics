@@ -17,3 +17,13 @@ env/
 .env
 *.so
 .pytest_cache/
+
+# Type checkers and linters
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# Test coverage
+.coverage
+htmlcov/
+coverage.xml

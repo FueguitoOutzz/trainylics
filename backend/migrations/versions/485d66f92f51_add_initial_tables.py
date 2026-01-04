@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('birth', sa.Date(), nullable=False),
-    sa.Column('sex', sa.Enum('MALE', 'FEMALE', name='sex'), nullable=False),
+    sa.Column('sex', sa.Enum('Hombre', 'Mujer', name='sex'), nullable=False),
     sa.Column('profile', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('phone_number', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -55,11 +55,11 @@ def upgrade() -> None:
     op.create_table('user_role',
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('modified_at', sa.DateTime(), nullable=False),
-    sa.Column('users_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('user_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('role_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.ForeignKeyConstraint(['role_id'], ['role.id'], ),
-    sa.ForeignKeyConstraint(['users_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('users_id', 'role_id')
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('user_id', 'role_id')
     )
     # ### end Alembic commands ###
 
