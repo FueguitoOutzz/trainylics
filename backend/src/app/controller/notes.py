@@ -91,3 +91,18 @@ async def get_notes(token: str = Depends(JWTbearer()), session: AsyncSession = D
             created_at=note.created_at
         ) for note, name in rows
     ]
+
+@router.delete("/{note_id}", status_code=204)
+async def delete_note(note_id: str, token: str = Depends(JWTbearer()), session: AsyncSession = Depends(get_db)):
+    user_id, role_name = await get_current_user_role(token, session)
+    
+    note = await session.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+        
+    if note.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this note")
+        
+    session.delete(note)
+    await session.commit()
+
