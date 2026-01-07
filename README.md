@@ -15,9 +15,3 @@ Abre una terminal en la carpeta del proyecto y ejecuta:
 ```bash
 docker-compose up --build
 ```
-
-- **Frontend**: http://localhost:80
-- **Backend API**: http://localhost:8000
-- **Documentación API**: http://localhost:8000/docs
-
----

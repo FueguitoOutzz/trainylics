@@ -1,38 +1,62 @@
+import base64
+from datetime import datetime
+from uuid import uuid4
 from fastapi import HTTPException
+from passlib.context import CryptContext
+from sqlalchemy import delete
+
 from app.repository.users import UserRepo
 from app.repository.role import RoleRepo
 from app.repository.user_role import UserRoleRepo
+from app.repository.person import PersonRepo
 from app.model.user_role import UserRole
+from app.model.person import Person
+from app.model.user import User
+from app.schema import CreateUserRequest
 from app.config import db
-from sqlalchemy import delete
+
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 class AdminService:
     
     @staticmethod
+    async def get_all_users():
+        return await UserRepo.get_all_with_roles()
+    @staticmethod
+    async def delete_user(user_id: str):
+        delete_roles = delete(UserRole).where(UserRole.user_id == user_id)
+        await db.execute(delete_roles)
+        
+        from sqlalchemy.future import select
+        q = select(User).where(User.id == user_id)
+        res = await db.execute(q)
+        user = res.scalars().one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            
+        delete_user = delete(User).where(User.id == user_id)
+        await db.execute(delete_user)
+        
+        if user.person_id:
+             delete_person = delete(Person).where(Person.id == user.person_id)
+             await db.execute(delete_person)
+             
+        await db.commit()
+        return True
+
+    @staticmethod
     async def promote_user(username: str, role_name: str):
-        # 1. Verificamos que el usuario exista
         user = await UserRepo.find_by_username(username)
         if not user:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-        # 2. Verificamos que el rol exista
         role = await RoleRepo.find_by_role_name(role_name)
         if not role:
             raise HTTPException(status_code=404, detail="Rol no encontrado")
 
-        # 3. Borramos (limpiamos) los roles anteriores del usuario
-        #    (Asumimos que un usuario solo tiene un rol principal a la vez en este modelo simple)
-        #    Si UserRoleRepo tuviera un método 'remove_all_roles_by_user', sería ideal,
-        #    pero podemos usar SQL directo si es necesario o extender el Repo.
-        
-        # Como UserRoleRepo hereda de BaseRepo, verificamos si tenemos acceso directo a DB.
-        # UserRoleRepo no tiene un metodo delete por user_id especifico, así que lo hacemos manual con SQL.
-        
         delete_query = delete(UserRole).where(UserRole.user_id == user.id)
         await db.execute(delete_query)
         
-        # 4. Asignamos el nuevo rol
         await UserRoleRepo.assign_role(user_id=user.id, role_id=role.id)
-        
-        # El BaseRepo de UserRoleRepo hace commit en create/assign_role, asi que estamos listos.
         return True

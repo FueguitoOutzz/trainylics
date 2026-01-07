@@ -13,7 +13,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import db
 from app.service.auth_service import generate_role
 from app.model.note import Note
-from app.controller import authentication, users, admin, prediction
+from app.model.league import League
+from app.model.team import Team
+from app.model.player import Player
+from app.model.match import Match
+from app.model.league import League
+from app.model.team import Team
+from app.model.player import Player
+from app.model.match import Match
+from app.controller import authentication, users, admin, prediction, matches, notes
 
 
 def init_app():
@@ -59,6 +67,8 @@ def init_app():
     app.include_router(users.router)
     app.include_router(admin.router)
     app.include_router(prediction.router)
+    app.include_router(matches.router)
+    app.include_router(notes.router)
     
     return app
 

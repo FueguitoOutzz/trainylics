@@ -14,8 +14,7 @@ from app.repository.users import UserRepo
 from app.repository.user_role import UserRoleRepo
 from app.repository.auth_repo import JWTRepo
 
-# Use bcrypt_sha256 to avoid the 72-byte password length limit of raw bcrypt
-pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 class AuthService:
     
@@ -73,8 +72,13 @@ class AuthService:
         _username = await UserRepo.find_by_username(login.username)
         if not _username:
             raise HTTPException(status_code=400, detail="Nombre de usuario incorrecta.")
-        if not pwd_context.verify(login.password, _username.password):
-            raise HTTPException(status_code=400, detail="Contraseña incorrecta.")
+        
+        try:
+            if not pwd_context.verify(login.password, _username.password):
+                raise HTTPException(status_code=400, detail="Contraseña incorrecta.")
+        except Exception: 
+            raise HTTPException(status_code=400, detail="Cuenta antigua incompatible. Por favor regístrate de nuevo.")
+
         return JWTRepo(data={"user_id": _username.id}).generate_token()
     
     @staticmethod
@@ -86,8 +90,6 @@ class AuthService:
 
     @staticmethod
     async def logout_service():
-        # En una implementación stateless con JWT, el logout suele ser manejado por el cliente eliminando el token.
-        # Aquí se dejaría espacio para lógica de lista negra de tokens (blacklist) si se implementara a futuro.
         pass
         
 

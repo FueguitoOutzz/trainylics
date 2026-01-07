@@ -57,3 +57,25 @@ class ResponseSchema(BaseModel):
 class PromoteSchema(BaseModel):
     username: str
     role_name: str
+
+from typing import List
+
+class RoleSchema(BaseModel):
+    id: str
+    role_name: str
+    class Config:
+        from_attributes = True
+
+class UserSchema(BaseModel):
+    id: str
+    username: str
+    email: str
+    roles: List[RoleSchema]
+    class Config:
+        from_attributes = True
+
+class UserListResponse(BaseModel):
+    users: List[UserSchema]
+
+class CreateUserRequest(RegisterSchema):
+    role_name: str = "user"

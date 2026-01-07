@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 
@@ -22,7 +23,8 @@ class AsyncDatabaseSession:
 
     def init(self):
         self.engine = create_async_engine(DB_CONFIG, future=True, echo=True, connect_args={"ssl": False})
-        self.session = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)()
+        self.session_factory = sessionmaker(self.engine, expire_on_commit=False, class_=AsyncSession)
+        self.session = self.session_factory()
 
     async def create_all(self):
         async with self.engine.begin() as conn:
