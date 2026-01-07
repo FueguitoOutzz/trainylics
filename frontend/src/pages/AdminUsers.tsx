@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { getUsers, deleteUser, promoteUser, getMe } from '../services/api'
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Toaster } from "@/components/ui/sonner"
+
 import {
   Table,
   TableBody,
@@ -32,7 +32,7 @@ export default function AdminUsers() {
     try {
       const me = await getMe()
       if (!me.result || !me.result.roles.includes('admin')) {
-        toast.error("Unauthorized access")
+        toast.error("Acceso no autorizado")
         navigate('/home')
         return
       }
@@ -50,7 +50,7 @@ export default function AdminUsers() {
       setUsers(data.users || [])
     } catch (e) {
       console.error(e)
-      toast.error("Failed to load users")
+      toast.error("Error al cargar usuarios")
     } finally {
       setLoading(false)
     }
@@ -95,36 +95,36 @@ export default function AdminUsers() {
   const handleRoleChange = async (username: string, newRole: string) => {
     try {
       await promoteUser({ username, role_name: newRole })
-      toast.success(`User ${username} role updated to ${newRole}`)
+      toast.success(`Usuario ${username} rol actualizado a ${newRole}`)
       loadUsers()
     } catch (e) {
       console.error(e)
-      toast.error("Error updating role")
+      toast.error("Error al actualizar rol")
     }
   }
 
-  if (loading) return <div className="p-8">Loading...</div>
+  if (loading) return <div className="p-8">Cargando...</div>
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <Toaster />
+
       <div className="container mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Admin Users</h1>
+          <h1 className="text-3xl font-bold">Admin Usuarios</h1>
           <Button variant="outline" onClick={() => navigate('/home')}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Volver al Home
           </Button>
         </div>
 
-        <div className="border rounded-md bg-card">
+        <div className="border rounded-md bg-card overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Username</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Current Role</TableHead>
-                <TableHead>Change Role</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Usuario</TableHead>
+                <TableHead>Correo</TableHead>
+                <TableHead>Rol Actual</TableHead>
+                <TableHead>Cambiar Rol</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,7 +132,7 @@ export default function AdminUsers() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
                     {user.username}
-                    {user.id === currentUser?.id && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
+                    {user.id === currentUser?.id && <span className="ml-2 text-xs text-muted-foreground">(Tú)</span>}
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
@@ -150,7 +150,7 @@ export default function AdminUsers() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="user">Usuario</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="entrenador">Entrenador</SelectItem>
                         <SelectItem value="scouter">Scouter</SelectItem>
@@ -173,7 +173,7 @@ export default function AdminUsers() {
               {users.length === 0 && !loading && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No users found
+                    No hay usuarios
                   </TableCell>
                 </TableRow>
               )}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { Trophy, TrendingUp, Users, Target, ChevronDown } from "lucide-react"
+import { Trophy, TrendingUp, Users, Target, ChevronDown, Menu } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import MatchResults from "@/components/match-results"
 import PredictionCard from "@/components/prediction-card"
 import StatsOverview from "@/components/stats-overview"
@@ -88,7 +89,7 @@ export default function SportsResultsPage() {
             <nav className="hidden md:flex items-center gap-6">
               {user?.roles?.includes('admin') && (
                 <Button variant="outline" size="sm" onClick={() => navigate('/admin/users')}>
-                  Admin Users
+                  Administrar Usuarios
                 </Button>
               )}
               <Button variant="ghost" size="sm">
@@ -118,6 +119,50 @@ export default function SportsResultsPage() {
                 Cerrar Sesión
               </Button>
             </nav>
+
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <div className="flex flex-col gap-4 mt-8">
+                    {user?.roles?.includes('admin') && (
+                      <Button variant="outline" onClick={() => navigate('/admin/users')}>
+                        Administrar Usuarios
+                      </Button>
+                    )}
+                    <Button variant="ghost" className="justify-start">
+                      Resultados
+                    </Button>
+                    <Button variant="ghost" className="justify-start">
+                      Predicciones
+                    </Button>
+                    <Button variant="ghost" className="justify-start">
+                      Estadísticas
+                    </Button>
+
+                    <div className="px-4 py-2 text-sm font-medium text-muted-foreground">
+                      Ligas
+                    </div>
+                    <div className="pl-4 flex flex-col gap-2 border-l ml-4">
+                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Liga de Primera")}>Liga de Primera</Button>
+                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Liga de Ascenso")}>Liga de Ascenso</Button>
+                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Segunda División")}>Segunda División</Button>
+                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Tercera A")}>Tercera A</Button>
+                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Tercera B")}>Tercera B</Button>
+                    </div>
+
+                    <Button variant="destructive" onClick={handleLogout} className="mt-4">
+                      Cerrar Sesión
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </header>
@@ -178,7 +223,7 @@ export default function SportsResultsPage() {
 
         {/* Stats Overview */}
         <div className="mt-8">
-          <StatsOverview />
+          <StatsOverview accuracy={stats.accuracy} />
         </div>
       </main>
     </div>

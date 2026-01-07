@@ -2,10 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from typing import List, Optional
+from datetime import datetime
 from pydantic import BaseModel
 
 from app.config import db
 from app.model.note import Note
+from app.model.user import User
+from app.model.person import Person
 from app.model.user_role import UserRole
 from app.model.role import Role
 from app.repository.auth_repo import JWTbearer, JWTRepo
@@ -19,12 +22,12 @@ async def get_db():
 class NoteCreate(BaseModel):
     content: str
 
-class NoteRead(BaseModel):
+class NoteResponse(BaseModel):
     id: str
     content: str
     role: Optional[str]
-    user_id: Optional[str]
-    created_at: Optional[str] = None 
+    author_name: Optional[str]
+    created_at: Optional[datetime] = None 
 
 async def get_current_user_role(token: str, session: AsyncSession) -> tuple[str, str]:
     """Returns (user_id, role_name)"""
@@ -43,7 +46,7 @@ async def get_current_user_role(token: str, session: AsyncSession) -> tuple[str,
          
     return user_id, role_name
 
-@router.post("/", response_model=Note)
+@router.post("/", response_model=NoteResponse)
 async def create_note(note: NoteCreate, token: str = Depends(JWTbearer()), session: AsyncSession = Depends(get_db)):
     user_id, role_name = await get_current_user_role(token, session)
     
@@ -55,33 +58,36 @@ async def create_note(note: NoteCreate, token: str = Depends(JWTbearer()), sessi
     session.add(new_note)
     await session.commit()
     await session.refresh(new_note)
-    return new_note
 
-@router.get("/", response_model=List[Note])
+    # Fetch author name
+    query = select(Person.name).join(User, User.person_id == Person.id).where(User.id == user_id)
+    author_name = (await session.exec(query)).first()
+
+    return NoteResponse(
+        id=new_note.id,
+        content=new_note.content,
+        role=new_note.role,
+        author_name=author_name,
+        created_at=new_note.created_at
+    )
+
+@router.get("/", response_model=List[NoteResponse])
 async def get_notes(token: str = Depends(JWTbearer()), session: AsyncSession = Depends(get_db)):
     user_id, role_name = await get_current_user_role(token, session)
     
-    target_role = ""
-    if role_name == "entrenador": # Coach
-        target_role = "scouter"
-    elif role_name == "scouter":
-        target_role = "entrenador"
-    else:
-        # Admin or User? maybe see all or their own? 
-        # For now, let's say they see their own notes + target role logic for others
-        # User request: "notas de los scouters se muestren en una bandeja o modulo para los entrenadores y viceversa"
-        # If I am admin, maybe I see everything.
-        pass
+    # Logic for visibility remains similar (returning all for now/demo)
         
-    query = select(Note)
-    if target_role:
-        query = query.where(Note.role == target_role)
-    else:
-        # If no specific target logic (e.g. admin or regular user), maybe just return all or nothing?
-        # Let's return all for now if uncertain, or just empty.
-        # But wait, if I am a coach, I want to see thoughts from scouters.
-        pass
-
+    query = select(Note, Person.name).join(User, Note.user_id == User.id).join(Person, User.person_id == Person.id)
+    
     result = await session.exec(query)
-    notes = result.all()
-    return notes
+    rows = result.all()
+    
+    return [
+        NoteResponse(
+            id=note.id,
+            content=note.content,
+            role=note.role,
+            author_name=name,
+            created_at=note.created_at
+        ) for note, name in rows
+    ]

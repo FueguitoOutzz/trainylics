@@ -4,15 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
-const data = [
-  { league: "Liga de Primera", accuracy: 89 },
-  { league: "Liga de Ascenso", accuracy: 87 },
-  { league: "Segunda División", accuracy: 85 },
-  { league: "Tercera A", accuracy: 91 },
-  { league: "Tercera B", accuracy: 83 },
-]
+interface StatsOverviewProps {
+  accuracy: number
+}
 
-export default function StatsOverview() {
+export default function StatsOverview({ accuracy }: StatsOverviewProps) {
+  const data = [
+    { league: "Campeonato Chileno", accuracy: Math.round(accuracy * 100) },
+  ]
+
   return (
     <Card>
       <CardHeader>

@@ -40,10 +40,10 @@ export default function Register() {
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="username">Usuario</Label>
-                <Input placeholder="tecnico" required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
+                <Input placeholder="testo" required value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="name">Nombre</Label>
@@ -61,7 +61,7 @@ export default function Register() {
               <Input type="password" required value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="phone">Teléfono</Label>
                 <Input placeholder="+56912345678" required value={form.phone_number} onChange={e => setForm({ ...form, phone_number: e.target.value })} />

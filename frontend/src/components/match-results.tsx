@@ -15,7 +15,7 @@ interface Match {
   home_team: { name: string }
   away_team_id: string
   away_team: { name: string }
-  prediction?: string 
+  prediction?: string
 }
 
 export default function MatchResults() {
@@ -79,13 +79,13 @@ export default function MatchResults() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     {/* Accessing nested team name if available, else ID */}
-                    <span className="font-semibold text-foreground">{match.home_team?.name || `Team ${match.home_team_id}`}</span>
+                    <span className="font-semibold text-foreground truncate mr-2">{match.home_team?.name || `Team ${match.home_team_id}`}</span>
                     {match.home_goals !== null && (
                       <span className="text-2xl font-bold text-foreground">{match.home_goals}</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-foreground">{match.away_team?.name || `Team ${match.away_team_id}`}</span>
+                    <span className="font-semibold text-foreground truncate mr-2">{match.away_team?.name || `Team ${match.away_team_id}`}</span>
                     {match.away_goals !== null && (
                       <span className="text-2xl font-bold text-foreground">{match.away_goals}</span>
                     )}

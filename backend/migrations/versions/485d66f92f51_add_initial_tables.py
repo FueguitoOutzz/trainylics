@@ -35,12 +35,7 @@ def upgrade() -> None:
     sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('birth', sa.Date(), nullable=False),
-<<<<<<< HEAD
-    sa.Column('sex', sa.Enum('Hombre', 'Mujer', name='sex'), nullable=False),
-=======
-
     sa.Column('sex', postgresql.ENUM('MALE', 'FEMALE', name='sex', create_type=False), nullable=False),
->>>>>>> 0f5802dcabaa7f9d3babb927b13eca9feb306d03
     sa.Column('profile', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('phone_number', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.PrimaryKeyConstraint('id')

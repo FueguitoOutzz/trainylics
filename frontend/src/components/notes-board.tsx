@@ -11,6 +11,7 @@ interface Note {
     id: string
     content: string
     role: string
+    author_name: string
     created_at: string
 }
 
@@ -59,9 +60,19 @@ export default function NotesBoard() {
                             notes.map((note) => (
                                 <div key={note.id} className="flex flex-col gap-1 p-3 rounded-lg bg-muted/50">
                                     <div className="flex justify-between items-center">
-                                        <Badge variant="outline" className="text-xs capitalize">{note.role}</Badge>
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-semibold text-sm">{note.author_name || 'Desconocido'}</span>
+                                            <Badge variant="secondary" className="text-[10px] capitalize px-1 py-0">{note.role}</Badge>
+                                        </div>
                                         <span className="text-[10px] text-muted-foreground">
-                                            {new Date().toLocaleDateString()}
+                                            {new Date(note.created_at + (note.created_at.endsWith('Z') ? '' : 'Z')).toLocaleString("es-CL", {
+                                                timeZone: "America/Santiago",
+                                                day: "2-digit",
+                                                month: "2-digit",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit"
+                                            })}
                                         </span>
                                     </div>
                                     <p className="text-sm mt-1">{note.content}</p>
