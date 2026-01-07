@@ -47,7 +47,7 @@ export default function Register() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="name">Nombre</Label>
-                <Input placeholder="Tu Nombre" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                <Input placeholder="" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
               </div>
             </div>
 

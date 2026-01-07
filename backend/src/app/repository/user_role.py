@@ -15,7 +15,6 @@ class UserRoleRepo(BaseRepo):
 
     @staticmethod
     async def get_role_names_by_user_id(user_id: str):
-        # Retorna una lista de nombres de roles asociados a un usuario dado su ID
         query = select(Role.role_name).join(UserRole, Role.id == UserRole.role_id).where(UserRole.user_id == user_id)
         result = await db.execute(query)
         return [r[0] for r in result.all()]

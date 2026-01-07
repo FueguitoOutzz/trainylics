@@ -15,9 +15,6 @@ class Team(SQLModel, TimeMixin, table=True):
     
     players: List["Player"] = Relationship(back_populates="team")
     
-    # Relationships for matches (home/away) will be defined in Match model or here with sa_relationship_kwargs if needed, 
-    # but typically defined in Match and back_populates here.
-    # Since Match has two FKs to Team, back_populates needs care.
-    # For now, we'll leave explicitly defining the list here until Match is defined or if we need to access matches from team.
+
     home_matches: List["Match"] = Relationship(sa_relationship_kwargs={"primaryjoin": "Team.id==Match.home_team_id"}, back_populates="home_team")
     away_matches: List["Match"] = Relationship(sa_relationship_kwargs={"primaryjoin": "Team.id==Match.away_team_id"}, back_populates="away_team")

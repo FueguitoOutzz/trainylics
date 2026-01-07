@@ -10,8 +10,8 @@ from app.model.mixins import TimeMixin
 
 
 class Sex(str, Enum):
-    MALE = "Hombre"
-    FEMALE = "Mujer"
+    Hombre = "Hombre"
+    Mujer = "Mujer"
 
 
 class Person(SQLModel, TimeMixin, table=True):

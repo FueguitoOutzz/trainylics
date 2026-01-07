@@ -1,5 +1,6 @@
 from sqlalchemy import update as sql_update
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 from app.config import db, commit_session
 from app.model.user import User
@@ -28,5 +29,10 @@ class UserRepo(BaseRepo):
 
     @staticmethod
     async def execute(query):
-        # Convenience wrapper to execute arbitrary select queries
         return await db.execute(query)
+
+    @staticmethod
+    async def get_all_with_roles():
+        query = select(User).options(selectinload(User.roles))
+        result = await db.execute(query)
+        return result.scalars().all()

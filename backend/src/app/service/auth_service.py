@@ -14,61 +14,71 @@ from app.repository.users import UserRepo
 from app.repository.user_role import UserRoleRepo
 from app.repository.auth_repo import JWTRepo
 
-# Use bcrypt_sha256 to avoid the 72-byte password length limit of raw bcrypt
-pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 class AuthService:
     
     @staticmethod
     async def register_service(register:RegisterSchema):
+        try:
         
-        _person_id = str(uuid4())
-        _user_id = str(uuid4())
+            _person_id = str(uuid4())
+            _user_id = str(uuid4())
+            
+            birth_date = datetime.strptime(register.birth, "%d-%m-%Y").date()
+            
+            # Cargar imagen por defecto
+            with open("media/profile.png", "rb") as f:
+                image_str = base64.b64encode(f.read())
+            imagen_str = "data:image/png;base64," + image_str.decode('utf-8')
+            
+            _person = Person(id=_person_id,
+                            name=register.name,
+                            birth=birth_date,
+                            sex=register.sex,
+                            profile=imagen_str,
+                            phone_number=register.phone_number)
+            
+            _user = User(id=_user_id,
+                        username=register.username,
+                        email=register.email,
+                        password=pwd_context.hash(register.password),
+                        person_id=_person_id)
+            
+            _role = await RoleRepo.find_by_role_name("user")
+            if not _role:
+                raise HTTPException(status_code=500, detail="Default role 'user' not found")
+            _user_role = UserRole(user_id=_user_id, role_id=_role.id)
         
-        birth_date = datetime.strptime(register.birth, "%d-%m-%Y").date()
-        
-        # Cargar imagen por defecto
-        with open("media/profile.png", "rb") as f:
-            image_str = base64.b64encode(f.read())
-        imagen_str = "data:image/png;base64," + image_str.decode('utf-8')
-        
-        _person = Person(id=_person_id,
-                        name=register.name,
-                        birth=birth_date,
-                        sex=register.sex,
-                        profile=imagen_str,
-                        phone_number=register.phone_number)
-        
-        _user = User(id=_user_id,
-                    username=register.username,
-                    email=register.email,
-                    password=pwd_context.hash(register.password),
-                    person_id=_person_id)
-        
-        _role = await RoleRepo.find_by_role_name("user")
-        if not _role:
-            raise HTTPException(status_code=500, detail="Default role 'user' not found")
-        _user_role = UserRole(user_id=_user_id, role_id=_role.id)
-        
-        _username = await UserRepo.find_by_username(register.username)
-        if _username:
-            raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
-        
-        _email = await UserRepo.find_by_email(register.email)
-        if _email:
-            raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
-        else:
-            await PersonRepo.create(**_person.dict())
-            await UserRepo.create(**_user.dict())
-            await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
+            _username = await UserRepo.find_by_username(register.username)
+            if _username:
+                raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
+            
+            _email = await UserRepo.find_by_email(register.email)
+            if _email:
+                raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
+            else:
+                await PersonRepo.create(**_person.dict())
+                await UserRepo.create(**_user.dict())
+                await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
+        except Exception as e:
+            import traceback
+            import sys
+            traceback.print_exc(file=sys.stderr)
+            raise HTTPException(status_code=500, detail=f"INTERNAL ERROR: {str(e)}")
             
     @staticmethod
     async def login_service(login: LoginSchema):
         _username = await UserRepo.find_by_username(login.username)
         if not _username:
             raise HTTPException(status_code=400, detail="Nombre de usuario incorrecta.")
-        if not pwd_context.verify(login.password, _username.password):
-            raise HTTPException(status_code=400, detail="Contraseña incorrecta.")
+        
+        try:
+            if not pwd_context.verify(login.password, _username.password):
+                raise HTTPException(status_code=400, detail="Contraseña incorrecta.")
+        except Exception: 
+            raise HTTPException(status_code=400, detail="Cuenta antigua incompatible. Por favor regístrate de nuevo.")
+
         return JWTRepo(data={"user_id": _username.id}).generate_token()
     
     @staticmethod
@@ -80,8 +90,6 @@ class AuthService:
 
     @staticmethod
     async def logout_service():
-        # En una implementación stateless con JWT, el logout suele ser manejado por el cliente eliminando el token.
-        # Aquí se dejaría espacio para lógica de lista negra de tokens (blacklist) si se implementara a futuro.
         pass
         
 
