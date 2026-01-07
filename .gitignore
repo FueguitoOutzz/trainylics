@@ -18,7 +18,6 @@ env/
 *.so
 .pytest_cache/
 
-<<<<<<< HEAD
 # Type checkers and linters
 .mypy_cache/
 .ruff_cache/
@@ -28,11 +27,10 @@ env/
 .coverage
 htmlcov/
 coverage.xml
-=======
+
 # Local Env Files
 .env
 .env.*
 
 # Vite Junk
 vite.config.ts.timestamp*
->>>>>>> 0f5802dcabaa7f9d3babb927b13eca9feb306d03
