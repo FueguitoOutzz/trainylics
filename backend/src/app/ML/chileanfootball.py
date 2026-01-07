@@ -17,12 +17,12 @@ class ChileanLeaguePredictor:
 
     def prepare_data(self, match_data_list, training=False):
         """
-        Prepares the data for training or prediction.
-        Ensure incoming data has the expected feature keys.
+        Prepara los datos para entrenar o predecir.
+        Asegúrate de que los datos de entrada tengan las claves de las características esperadas.
         """
         df = pd.DataFrame(match_data_list)
         
-        # Ensure result column exists for training
+        # Asegúrate de que los datos de entrada tengan las claves de las características esperadas.
         if training and 'home_goals' in df.columns and 'away_goals' in df.columns:
             # Drop rows where goals are None (if any leaked in during training)
             df = df.dropna(subset=['home_goals', 'away_goals'])
@@ -38,7 +38,7 @@ class ChileanLeaguePredictor:
             df['target'] = df.apply(determine_result, axis=1)
             df['target'] = df['target'].astype(int)
         
-        # Fill missing values for features with 0 (as in notebook)
+        # Llena los valores faltantes para las características con 0 (como en el notebook)
         for feature in self.features:
             if feature not in df.columns:
                 df[feature] = 0
@@ -48,32 +48,32 @@ class ChileanLeaguePredictor:
 
     def train(self, match_data_list):
         """
-        Trains the Random Forest model.
+        Entrena el modelo Random Forest.
         """
         if not match_data_list:
-            print("No training data provided.")
+            print("No se proporcionó datos de entrenamiento.")
             return
             
         df = self.prepare_data(match_data_list, training=True)
         
         if df.empty:
-            print("Training dataframe is empty after preparation.")
+            print("El dataframe de entrenamiento está vacío después de la preparación.")
             return
 
         X = df[self.features]
         y = df['target']
         
-        print(f"Training on {len(df)} samples. Target distribution: {y.value_counts().to_dict()}")
+        print(f"Entrenando con {len(df)} muestras. Distribución del objetivo: {y.value_counts().to_dict()}")
 
         try:
-            # If dataset is too small, skip validation split and train on all
+            # Si el dataset es demasiado pequeño, saltar la división de validación y entrenar en todo
             if len(df) < 10:
-                print("Dataset too small for split, training on all data.")
+                print("Dataset demasiado pequeño para la división, entrenando en todo el conjunto de datos.")
                 self.model.fit(X, y)
-                self.accuracy = 1.0 # arbitrary perfect score since we can't test
+                self.accuracy = 1.0 # Puntuación perfecta arbitraria ya que no podemos probar
                 return
 
-            # Check if we can stratify
+            # Verificar si podemos estratificar
             stratify_param = y if len(y.unique()) > 1 and y.value_counts().min() > 1 else None
             
             X_train, X_test, y_train, y_test = train_test_split(
@@ -100,26 +100,26 @@ class ChileanLeaguePredictor:
 
     def predict(self, match_data):
         """
-        Predicts the result for a single match.
+        Predecir el resultado para un solo partido.
         """
         if self.model is None:
             raise Exception("Model not trained")
             
-        # Wrap single dict in list to use prepare_data
+        # Envuelve el diccionario único en una lista para usar prepare_data
         df = self.prepare_data([match_data], training=False)
         X = df[self.features]
         
         prediction_index = self.model.predict(X)[0]
         
-        # Map back to string
+        # Mapear de vuelta a string
         result_map = {0: 'Local', 1: 'Empate', 2: 'Visita'}
         result_str = result_map.get(prediction_index, "Desconocido")
         
-        # Get probability/confidence
+        # Obtener probabilidad/confianza
         probabilities = self.model.predict_proba(X)[0]
         confidence = max(probabilities)
         
         return {
             "result": result_str,
-            "accuracy": confidence # Return confidence score for this prediction
+            "accuracy": confidence # Devuelve la puntuación de confianza para esta predicción
         }
