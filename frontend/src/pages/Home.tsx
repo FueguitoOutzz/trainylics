@@ -72,102 +72,7 @@ export default function SportsResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <Trophy className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">trainytics</h1>
-                <p className="text-sm text-muted-foreground">Plataforma para entrenar datos deportivos con IA para entrenadores de fútbol</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center gap-6">
-              {user?.roles?.includes('admin') && (
-                <Button variant="outline" size="sm" onClick={() => navigate('/admin/users')}>
-                  Administrar Usuarios
-                </Button>
-              )}
-              <Button variant="ghost" size="sm">
-                Resultados
-              </Button>
-              <Button variant="ghost" size="sm">
-                Predicciones
-              </Button>
-              <Button variant="ghost" size="sm">
-                Estadísticas
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-1">
-                    Ligas <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => console.log("Liga de Primera")}>Liga de Primera</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Liga de Ascenso")}>Liga de Ascenso</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Segunda División")}>Segunda División</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Tercera A")}>Tercera A</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Tercera B")}>Tercera B</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button variant="destructive" size="sm" onClick={handleLogout}>
-                Cerrar Sesión
-              </Button>
-            </nav>
-
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent>
-                  <div className="flex flex-col gap-4 mt-8">
-                    {user?.roles?.includes('admin') && (
-                      <Button variant="outline" onClick={() => navigate('/admin/users')}>
-                        Administrar Usuarios
-                      </Button>
-                    )}
-                    <Button variant="ghost" className="justify-start">
-                      Resultados
-                    </Button>
-                    <Button variant="ghost" className="justify-start">
-                      Predicciones
-                    </Button>
-                    <Button variant="ghost" className="justify-start">
-                      Estadísticas
-                    </Button>
-
-                    <div className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                      Ligas
-                    </div>
-                    <div className="pl-4 flex flex-col gap-2 border-l ml-4">
-                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Liga de Primera")}>Liga de Primera</Button>
-                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Liga de Ascenso")}>Liga de Ascenso</Button>
-                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Segunda División")}>Segunda División</Button>
-                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Tercera A")}>Tercera A</Button>
-                      <Button variant="ghost" size="sm" className="justify-start" onClick={() => console.log("Tercera B")}>Tercera B</Button>
-                    </div>
-
-                    <Button variant="destructive" onClick={handleLogout} className="mt-4">
-                      Cerrar Sesión
-                    </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
         {/* Hero Stats */}
         <div className="mb-8 grid gap-4 md:grid-cols-3">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
@@ -176,7 +81,7 @@ export default function SportsResultsPage() {
               <Target className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{(stats.accuracy * 100).toFixed(1)}%</div>
+              <div className="text-3xl font-bold text-foreground">-</div>
             </CardContent>
           </Card>
 
@@ -186,7 +91,7 @@ export default function SportsResultsPage() {
               <Trophy className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">10</div>
+              <div className="text-3xl font-bold text-foreground">-</div>
               <p className="text-xs text-muted-foreground mt-1">Esta temporada</p>
             </CardContent>
           </Card>
@@ -225,7 +130,6 @@ export default function SportsResultsPage() {
         <div className="mt-8">
           <StatsOverview accuracy={stats.accuracy} />
         </div>
-      </main>
     </div>
   )
 }

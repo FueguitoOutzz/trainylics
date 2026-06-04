@@ -11,11 +11,11 @@ async def get_all_users(_=Depends(RoleChecker(["admin"]))):
     users = await AdminService.get_all_users()
     return UserListResponse(users=users)
 
-# @router.post("/users", response_model=ResponseSchema)
-# async def create_user(request: CreateUserRequest, _=Depends(RoleChecker(["admin"]))):
-#     """Crea un nuevo usuario (admin only)."""
-#     await AdminService.create_user(request)
-#     return ResponseSchema(detail="Usuario creado exitosamente")
+@router.post("/users", response_model=ResponseSchema)
+async def create_user(request: CreateUserRequest, _=Depends(RoleChecker(["admin"]))):
+    """Crea un nuevo usuario (admin only)."""
+    await AdminService.create_user(request)
+    return ResponseSchema(detail="Usuario creado exitosamente")
 
 @router.delete("/users/{user_id}", response_model=ResponseSchema)
 async def delete_user(user_id: str, _=Depends(RoleChecker(["admin"]))):

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { Trash2, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { getUsers, deleteUser, promoteUser, getMe } from '../services/api'
+import { getUsers, deleteUser, promoteUser, getMe, createUser } from '../services/api'
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
@@ -21,12 +21,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function AdminUsers() {
   const navigate = useNavigate()
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState<any>(null)
+  
+  // Create User State
+  const [createOpen, setCreateOpen] = useState(false)
+  const [newUsername, setNewUsername] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newName, setNewName] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [newRole, setNewRole] = useState('entrenador')
+  const [creating, setCreating] = useState(false)
 
   const checkAuth = async () => {
     try {
@@ -103,6 +123,31 @@ export default function AdminUsers() {
     }
   }
 
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreating(true)
+    try {
+      await createUser({
+        username: newUsername,
+        email: newEmail,
+        name: newName,
+        password: newPassword,
+        role_name: newRole
+      })
+      toast.success("Usuario creado exitosamente")
+      setCreateOpen(false)
+      setNewUsername('')
+      setNewEmail('')
+      setNewName('')
+      setNewPassword('')
+      loadUsers()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.detail || "Error al crear usuario")
+    } finally {
+      setCreating(false)
+    }
+  }
+
   if (loading) return <div className="p-8">Cargando...</div>
 
   return (
@@ -111,9 +156,62 @@ export default function AdminUsers() {
       <div className="container mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Admin Usuarios</h1>
-          <Button variant="outline" onClick={() => navigate('/home')}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Volver al Home
-          </Button>
+          <div className="flex gap-4">
+            <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+              <DialogTrigger asChild>
+                <Button>Crear Usuario</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <form onSubmit={handleCreateUser}>
+                  <DialogHeader>
+                    <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                    <DialogDescription>
+                      Ingresa los datos del nuevo entrenador o scouter.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Nombre Completo</Label>
+                      <Input id="name" required value={newName} onChange={e => setNewName(e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="username">Nombre de Usuario</Label>
+                      <Input id="username" required value={newUsername} onChange={e => setNewUsername(e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Correo</Label>
+                      <Input id="email" type="email" required value={newEmail} onChange={e => setNewEmail(e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Contraseña Provisional</Label>
+                      <Input id="password" required value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="role">Rol</Label>
+                      <Select value={newRole} onValueChange={setNewRole}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="entrenador">Entrenador</SelectItem>
+                          <SelectItem value="scouter">Scouter</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" disabled={creating}>
+                      {creating ? "Creando..." : "Guardar"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline" onClick={() => navigate('/home')}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+            </Button>
+          </div>
         </div>
 
         <div className="border rounded-md bg-card overflow-x-auto">

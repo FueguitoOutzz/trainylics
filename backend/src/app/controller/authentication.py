@@ -12,10 +12,11 @@ from app.model.user import User
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=ResponseSchema)
-async def register_controller(register: RegisterSchema):
-    await AuthService.register_service(register)
-    return ResponseSchema(detail="Usuario registrado exitosamente.")
+# Registro público deshabilitado: Solo los administradores pueden crear usuarios ahora
+# @router.post("/register", response_model=ResponseSchema)
+# async def register_controller(register: RegisterSchema):
+#     await AuthService.register_service(register)
+#     return ResponseSchema(detail="Usuario registrado exitosamente.")
 
 
 @router.post("/login", response_model=ResponseSchema)

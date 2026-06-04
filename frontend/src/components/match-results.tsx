@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import api from '../services/api'
+import LeagueStandings from "./league-standings"
 
 interface Match {
   id: number
@@ -55,109 +56,292 @@ function StatRow({ label, home, away, isPercent = false }: { label: string, home
 export default function MatchResults() {
   const [matches, setMatches] = useState<Match[]>([])
   const [selectedRound, setSelectedRound] = useState("1")
+  const [leagues, setLeagues] = useState<any[]>([])
+  
+  // New split selectors
+  const [selectedLiga, setSelectedLiga] = useState("Liga de Primera")
+  const [selectedYear, setSelectedYear] = useState("2026")
+  const [activeTab, setActiveTab] = useState<"results" | "standings">("results")
 
-  const fetchMatches = async (round: string) => {
+  useEffect(() => {
+    const loadLeagues = async () => {
+      try {
+        const response = await api.get('/matches/leagues')
+        const leaguesData = response.data || []
+        setLeagues(leaguesData)
+        
+        if (leaguesData.length > 0) {
+          const hasDefault = leaguesData.find(l => l.name === "Liga de Primera" && l.season === "2026")
+          if (hasDefault) {
+            setSelectedLiga("Liga de Primera")
+            setSelectedYear("2026")
+          } else {
+            setSelectedLiga(leaguesData[0].name)
+            setSelectedYear(leaguesData[0].season)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch leagues", error)
+      }
+    }
+    loadLeagues()
+  }, [])
+
+  // Auto-resolve selected year if the available seasons for selected liga doesn't contain it
+  useEffect(() => {
+    if (leagues.length > 0) {
+      const yearsForLiga = Array.from(new Set(leagues.filter(l => l.name === selectedLiga).map(l => l.season))).sort((a, b) => b.localeCompare(a))
+      if (yearsForLiga.length > 0 && !yearsForLiga.includes(selectedYear)) {
+        setSelectedYear(yearsForLiga[0])
+      }
+    }
+  }, [selectedLiga, leagues])
+
+  // Derive ID and round limits
+  const activeLeague = leagues.find(l => l.name === selectedLiga && l.season === selectedYear)
+  const selectedLeagueId = activeLeague ? activeLeague.id : ""
+  const maxRounds = (selectedLiga === "Liga de Ascenso" && selectedYear === "2022") ? 34 : 30
+
+  // Adjust round if it overflows limits
+  useEffect(() => {
+    if (parseInt(selectedRound) > maxRounds) {
+      setSelectedRound(maxRounds.toString())
+    }
+  }, [maxRounds, selectedRound])
+
+  const fetchMatches = async (round: string, leagueId: string) => {
+    if (!leagueId) return
     try {
-      const response = await api.get(`/matches/round/${round}`)
-      setMatches(response.data)
+      const response = await api.get(`/matches/round/${round}`, {
+        params: { league_id: leagueId }
+      })
+      setMatches(response.data || [])
     } catch (error) {
       console.error("Failed to fetch matches", error)
     }
   }
 
   useEffect(() => {
-    fetchMatches(selectedRound)
-  }, [selectedRound])
+    if (selectedLeagueId) {
+      fetchMatches(selectedRound, selectedLeagueId)
+    }
+  }, [selectedRound, selectedLeagueId])
+
+  // Unique league names and seasons for select fields
+  const availableLigas = Array.from(new Set(leagues.map(l => l.name))).sort()
+  const availableYears = Array.from(new Set(leagues.filter(l => l.name === selectedLiga).map(l => l.season))).sort((a, b) => b.localeCompare(a))
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">Resultados - Jornada {selectedRound}</CardTitle>
-          <div className="flex gap-2 items-center">
-            <span className="text-sm font-medium">Jornada:</span>
-            <Select value={selectedRound} onValueChange={setSelectedRound}>
-              <SelectTrigger className="w-[80px]">
-                <SelectValue placeholder="1" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 30 }, (_, i) => i + 1).map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <CardHeader className="pb-0">
+        <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-full">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b pb-4">
+            <div className="flex flex-col gap-2">
+              <CardTitle className="text-2xl font-bold tracking-tight">
+                {activeTab === "results" ? `Resultados - Jornada ${selectedRound}` : "Clasificación de la Liga"}
+              </CardTitle>
+              <TabsList className="grid w-[300px] grid-cols-2">
+                <TabsTrigger value="results">Resultados</TabsTrigger>
+                <TabsTrigger value="standings">Tabla de Posiciones</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div className="flex flex-wrap gap-4 items-center">
+              {availableLigas.length > 0 && (
+                <div className="flex gap-2 items-center">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase">Liga:</span>
+                  <Select value={selectedLiga} onValueChange={setSelectedLiga}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Selecciona Liga" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableLigas.map((name) => (
+                        <SelectItem key={name} value={name}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {availableYears.length > 0 && (
+                <div className="flex gap-2 items-center">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase">Año:</span>
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="Año" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableYears.map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {activeTab === "results" && (
+                <div className="flex gap-2 items-center">
+                  <span className="text-xs text-muted-foreground font-semibold uppercase">Jornada:</span>
+                  <Select value={selectedRound} onValueChange={setSelectedRound}>
+                    <SelectTrigger className="w-[80px]">
+                      <SelectValue placeholder="1" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: maxRounds }, (_, i) => i + 1).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </Tabs>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {matches.length === 0 ? (
-          <p className="text-muted-foreground">No hay partidos para esta jornada.</p>
+      <CardContent className="pt-6">
+        {activeTab === "results" ? (
+          <div className="space-y-4">
+            {matches.length === 0 ? (
+              <p className="text-muted-foreground text-center py-6">No hay partidos para esta combinación de liga, año y jornada.</p>
+            ) : (
+              matches.map((match) => {
+                const isFinished = match.home_goals !== null && match.away_goals !== null
+                const homeWin = isFinished && match.home_goals! > match.away_goals!
+                const awayWin = isFinished && match.home_goals! < match.away_goals!
+                const isDraw = isFinished && match.home_goals! === match.away_goals!
+
+                return (
+                  <Dialog key={match.id}>
+                    <DialogTrigger asChild>
+                      <div
+                        className="rounded-lg border border-border bg-card p-4 transition-all hover:bg-accent/40 cursor-pointer shadow-sm hover:shadow-md border-l-4 hover:border-l-primary"
+                      >
+                        <div className="mb-3 flex items-center justify-between">
+                          <Badge variant="outline" className="text-xs">
+                            Jornada {match.round}
+                          </Badge>
+                          <Badge variant={isFinished ? "secondary" : "default"} className="text-xs font-semibold">
+                            {isFinished ? "Finalizado" : "Próximo"}
+                          </Badge>
+                        </div>
+
+                        <div className="flex flex-col space-y-3">
+                          {/* Home Team Row */}
+                          <div className="flex items-center justify-between">
+                            <span className={`truncate text-sm flex items-center gap-2 ${
+                              homeWin 
+                                ? "font-extrabold text-foreground text-base tracking-normal" 
+                                : awayWin 
+                                  ? "font-normal text-muted-foreground/70" 
+                                  : isDraw 
+                                    ? "font-semibold text-sky-200/90" 
+                                    : "font-semibold text-foreground"
+                            }`}>
+                              {match.home_team?.name || `Team ${match.home_team_id}`}
+                              {homeWin && (
+                                <span className="text-[10px] uppercase font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shadow-sm border border-emerald-500/20">
+                                  Ganador
+                                </span>
+                              )}
+                            </span>
+                            {match.home_goals !== null && (
+                              <span className={`text-2xl transition-all ${
+                                homeWin 
+                                  ? "font-black text-emerald-400 scale-105 drop-shadow-[0_0_8px_rgba(52,211,153,0.2)]" 
+                                  : awayWin 
+                                    ? "font-medium text-muted-foreground/60" 
+                                    : isDraw 
+                                      ? "font-black text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-400/20" 
+                                      : "font-bold text-foreground"
+                              }`}>
+                                {match.home_goals}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Away Team Row */}
+                          <div className="flex items-center justify-between">
+                            <span className={`truncate text-sm flex items-center gap-2 ${
+                              awayWin 
+                                ? "font-extrabold text-foreground text-base tracking-normal" 
+                                : homeWin 
+                                  ? "font-normal text-muted-foreground/70" 
+                                  : isDraw 
+                                    ? "font-semibold text-sky-200/90" 
+                                    : "font-semibold text-foreground"
+                            }`}>
+                              {match.away_team?.name || `Team ${match.away_team_id}`}
+                              {awayWin && (
+                                <span className="text-[10px] uppercase font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shadow-sm border border-emerald-500/20">
+                                  Ganador
+                                </span>
+                              )}
+                            </span>
+                            {match.away_goals !== null && (
+                              <span className={`text-2xl transition-all ${
+                                awayWin 
+                                  ? "font-black text-emerald-400 scale-105 drop-shadow-[0_0_8px_rgba(52,211,153,0.2)]" 
+                                  : homeWin 
+                                    ? "font-medium text-muted-foreground/60" 
+                                    : isDraw 
+                                      ? "font-black text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-400/20" 
+                                      : "font-bold text-foreground"
+                              }`}>
+                                {match.away_goals}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {isDraw && (
+                          <div className="mt-3 flex justify-center">
+                            <span className="text-[10px] uppercase tracking-widest font-black text-amber-400 bg-amber-500/10 px-3.5 py-1 rounded-full border border-amber-500/20 shadow-sm animate-pulse">
+                              Empate
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="mt-3 text-center border-t border-border/50 pt-2">
+                          <span className="text-xs text-muted-foreground hover:text-primary transition-colors underline decoration-dotted">Ver Estadísticas Detalladas</span>
+                        </div>
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-center pb-2 border-b mb-4">Estadísticas del Partido</DialogTitle>
+                      </DialogHeader>
+
+                      <div className="flex justify-between items-center mb-6 px-4">
+                        <div className="text-center w-1/3">
+                          <span className="font-bold block text-lg">{match.home_goals ?? '-'}</span>
+                          <span className="text-sm font-medium leading-none">{match.home_team?.name}</span>
+                        </div>
+                        <div className="text-xs font-bold text-muted-foreground">VS</div>
+                        <div className="text-center w-1/3">
+                          <span className="font-bold block text-lg">{match.away_goals ?? '-'}</span>
+                          <span className="text-sm font-medium leading-none">{match.away_team?.name}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-5 px-1">
+                        <StatRow label="Goles Esperados (xG)" home={match.xg_home} away={match.xg_away} />
+                        <StatRow label="Posesión" home={match.possession_home} away={match.possession_away} isPercent />
+                        <StatRow label="Tiros Totales" home={match.shots_home} away={match.shots_away} />
+                        <StatRow label="Tiros al Arco" home={match.shots_on_target_home} away={match.shots_on_target_away} />
+                        <StatRow label="Córners" home={match.corners_home} away={match.corners_away} />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )
+              })
+            )}
+          </div>
         ) : (
-          matches.map((match) => (
-            <Dialog key={match.id}>
-              <DialogTrigger asChild>
-                <div
-                  className="rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/50 cursor-pointer"
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      Jornada {match.round}
-                    </Badge>
-                    <Badge variant={match.home_goals !== null ? "secondary" : "default"} className="text-xs">
-                      {match.home_goals !== null ? "Finalizado" : "Próximo"}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-foreground truncate mr-2">{match.home_team?.name || `Team ${match.home_team_id}`}</span>
-                        {match.home_goals !== null && (
-                          <span className="text-2xl font-bold text-foreground">{match.home_goals}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-foreground truncate mr-2">{match.away_team?.name || `Team ${match.away_team_id}`}</span>
-                        {match.away_goals !== null && (
-                          <span className="text-2xl font-bold text-foreground">{match.away_goals}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <span className="text-xs text-muted-foreground underline decoration-dotted">Ver Estadísticas</span>
-                  </div>
-                </div>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-center pb-2 border-b mb-4">Estadísticas del Partido</DialogTitle>
-                </DialogHeader>
-
-                <div className="flex justify-between items-center mb-6 px-4">
-                  <div className="text-center w-1/3">
-                    <span className="font-bold block text-lg">{match.home_goals ?? '-'}</span>
-                    <span className="text-sm font-medium leading-none">{match.home_team?.name}</span>
-                  </div>
-                  <div className="text-xs font-bold text-muted-foreground">VS</div>
-                  <div className="text-center w-1/3">
-                    <span className="font-bold block text-lg">{match.away_goals ?? '-'}</span>
-                    <span className="text-sm font-medium leading-none">{match.away_team?.name}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-5 px-1">
-                  <StatRow label="Goles Esperados (xG)" home={match.xg_home} away={match.xg_away} />
-                  <StatRow label="Posesión" home={match.possession_home} away={match.possession_away} isPercent />
-                  <StatRow label="Tiros Totales" home={match.shots_home} away={match.shots_away} />
-                  <StatRow label="Tiros al Arco" home={match.shots_on_target_home} away={match.shots_on_target_away} />
-                  <StatRow label="Córners" home={match.corners_home} away={match.corners_away} />
-                </div>
-              </DialogContent>
-            </Dialog>
-          ))
+          <LeagueStandings leagueId={selectedLeagueId} />
         )}
       </CardContent>
     </Card>

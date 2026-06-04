@@ -43,9 +43,24 @@ cd frontend
 # 2. Iniciar el servidor de desarrollo
 npm run dev
 ```
-*La terminal te indicará que la app está lista, usualmente en http://localhost:3000.*
+*La terminal te indicará que la app está lista, usualmente en http://localhost:5173.*
 
 ## 3. Verificar
-Abre tu navegador en **http://localhost:3000**.
+Abre tu navegador en **http://localhost:5173**.
 - Deberías ver la pantalla de Login.
 - Intenta registrarte o iniciar sesión.
+
+---
+
+## Opción Recomendada: Ejecución con Docker
+
+Si prefieres usar Docker y no configurar dependencias manuales:
+
+1. Asegúrate de tener Docker y Docker Compose instalados.
+2. Abre una terminal en la raíz del proyecto.
+3. Ejecuta el siguiente comando para levantar ambos servicios:
+   ```powershell
+   docker-compose up --build
+   ```
+4. El Frontend estará disponible en **http://localhost:80** y la API en **http://localhost:8000**.
+5. Para detener los contenedores, usa `docker-compose down`.

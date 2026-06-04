@@ -21,11 +21,21 @@ async def get_db():
 
 class NoteCreate(BaseModel):
     content: str
+    category: Optional[str] = "general"
+    rating: Optional[int] = None
+    team_id: Optional[str] = None
+    player_id: Optional[str] = None
 
 class NoteResponse(BaseModel):
     id: str
     content: str
     role: Optional[str]
+    category: str
+    rating: Optional[int] = None
+    team_id: Optional[str] = None
+    player_id: Optional[str] = None
+    team_name: Optional[str] = None
+    player_name: Optional[str] = None
     author_name: Optional[str]
     created_at: Optional[datetime] = None 
 
@@ -37,7 +47,7 @@ async def get_current_user_role(token: str, session: AsyncSession) -> tuple[str,
     user_id = payload.get("user_id")
     
     # Fetch role
-    statement = select(Role.role_name).join(UserRole, UserRole.role_id == Role.id).where(UserRole.user_id == user_id)
+    statement = select(Role.role_name).join(UserRole, UserRole.role_id == Role.id).where(UserRole.users_id == user_id)
     result = await session.exec(statement)
     role_name = result.first()
     
@@ -53,7 +63,11 @@ async def create_note(note: NoteCreate, token: str = Depends(JWTbearer()), sessi
     new_note = Note(
         content=note.content,
         user_id=user_id,
-        role=role_name
+        role=role_name,
+        category=note.category,
+        rating=note.rating,
+        team_id=note.team_id,
+        player_id=note.player_id
     )
     session.add(new_note)
     await session.commit()
@@ -63,22 +77,53 @@ async def create_note(note: NoteCreate, token: str = Depends(JWTbearer()), sessi
     query = select(Person.name).join(User, User.person_id == Person.id).where(User.id == user_id)
     author_name = (await session.exec(query)).first()
 
+    team_name = None
+    if new_note.team_id:
+        from app.model.team import Team
+        team_name = (await session.exec(select(Team.name).where(Team.id == new_note.team_id))).first()
+
+    player_name = None
+    if new_note.player_id:
+        from app.model.player import Player
+        player_name = (await session.exec(select(Player.name).where(Player.id == new_note.player_id))).first()
+
     return NoteResponse(
         id=new_note.id,
         content=new_note.content,
         role=new_note.role,
+        category=new_note.category,
+        rating=new_note.rating,
+        team_id=new_note.team_id,
+        player_id=new_note.player_id,
+        team_name=team_name,
+        player_name=player_name,
         author_name=author_name,
         created_at=new_note.created_at
     )
 
 @router.get("/", response_model=List[NoteResponse])
-async def get_notes(token: str = Depends(JWTbearer()), session: AsyncSession = Depends(get_db)):
+async def get_notes(
+    team_id: Optional[str] = None,
+    player_id: Optional[str] = None,
+    category: Optional[str] = None,
+    token: str = Depends(JWTbearer()),
+    session: AsyncSession = Depends(get_db)
+):
     user_id, role_name = await get_current_user_role(token, session)
     
-    # Logic for visibility remains similar (returning all for now/demo)
-        
-    query = select(Note, Person.name).join(User, Note.user_id == User.id).join(Person, User.person_id == Person.id)
+    from sqlalchemy.orm import selectinload
+    query = select(Note, Person.name).join(User, Note.user_id == User.id).join(Person, User.person_id == Person.id).options(
+        selectinload(Note.team),
+        selectinload(Note.player)
+    )
     
+    if team_id:
+        query = query.where(Note.team_id == team_id)
+    if player_id:
+        query = query.where(Note.player_id == player_id)
+    if category:
+        query = query.where(Note.category == category)
+        
     result = await session.exec(query)
     rows = result.all()
     
@@ -87,6 +132,12 @@ async def get_notes(token: str = Depends(JWTbearer()), session: AsyncSession = D
             id=note.id,
             content=note.content,
             role=note.role,
+            category=note.category,
+            rating=note.rating,
+            team_id=note.team_id,
+            player_id=note.player_id,
+            team_name=note.team.name if note.team else None,
+            player_name=note.player.name if note.player else None,
             author_name=name,
             created_at=note.created_at
         ) for note, name in rows

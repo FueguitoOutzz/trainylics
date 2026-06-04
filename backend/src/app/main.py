@@ -17,11 +17,8 @@ from app.model.league import League
 from app.model.team import Team
 from app.model.player import Player
 from app.model.match import Match
-from app.model.league import League
-from app.model.team import Team
-from app.model.player import Player
-from app.model.match import Match
-from app.controller import authentication, users, admin, prediction, matches, notes
+from app.model.tactic import Tactic
+from app.controller import authentication, users, admin, prediction, matches, notes, sofascore, tactics
 
 
 def init_app():
@@ -56,6 +53,19 @@ def init_app():
     @app.on_event("startup")
     async def startup():
         await db.create_all()
+        from sqlalchemy import text
+        async with db.session as session:
+            try:
+                await session.execute(text("ALTER TABLE team ADD COLUMN IF NOT EXISTS sofascore_id INTEGER"))
+                await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS category VARCHAR DEFAULT 'general'"))
+                await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS rating INTEGER"))
+                await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS team_id VARCHAR"))
+                await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS player_id VARCHAR"))
+                await session.execute(text("ALTER TABLE match ALTER COLUMN home_goals DROP NOT NULL"))
+                await session.execute(text("ALTER TABLE match ALTER COLUMN away_goals DROP NOT NULL"))
+                await session.commit()
+            except Exception as e:
+                print(f"Migration error: {e}")
         await generate_role()
     @app.on_event("shutdown")
     async def shutdown():
@@ -69,6 +79,8 @@ def init_app():
     app.include_router(prediction.router)
     app.include_router(matches.router)
     app.include_router(notes.router)
+    app.include_router(sofascore.router)
+    app.include_router(tactics.router)
     
     return app
 

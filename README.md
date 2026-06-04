@@ -15,3 +15,8 @@ Abre una terminal en la carpeta del proyecto y ejecuta:
 ```bash
 docker-compose up --build
 ```
+
+### 3. Acceder
+Abre tu navegador y ve a:
+- **Backend API:** [http://localhost:8000](http://localhost:8000)
+- **Frontend:** [http://localhost:5173](http://localhost:5173)

@@ -14,8 +14,8 @@ class TeamRead(SQLModel):
 class MatchBase(SQLModel):
     date: datetime
     round: int
-    home_goals: int
-    away_goals: int
+    home_goals: Optional[int] = None
+    away_goals: Optional[int] = None
     
     possession_home: Optional[float] = None
     possession_away: Optional[float] = None

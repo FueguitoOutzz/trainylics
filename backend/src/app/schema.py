@@ -77,5 +77,24 @@ class UserSchema(BaseModel):
 class UserListResponse(BaseModel):
     users: List[UserSchema]
 
-class CreateUserRequest(RegisterSchema):
-    role_name: str = "user"
+class CreateUserRequest(BaseModel):
+    username: str
+    email: str
+    name: str
+    password: str
+    role_name: str
+
+class UpdateProfileRequest(BaseModel):
+    phone_number: str
+    birth: str
+    sex: str
+
+class SyncRoundRequest(BaseModel):
+    tournament_id: int
+    season_id: int
+    round_num: int
+    league_id: str
+
+class SyncRosterRequest(BaseModel):
+    sofascore_team_id: int
+    local_team_id: str

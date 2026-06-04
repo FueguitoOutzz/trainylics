@@ -23,10 +23,10 @@ export const getUsers = async () => {
   return response.data
 }
 
-// export const createUser = async (data: any) => {
-//   const response = await api.post('/admin/users', data)
-//   return response.data
-// }
+export const createUser = async (data: any) => {
+  const response = await api.post('/admin/users', data)
+  return response.data
+}
 
 
 export const deleteUser = async (userId: string) => {
@@ -41,6 +41,36 @@ export const promoteUser = async (data: { username: string; role_name: string })
 
 export const getMe = async () => {
   const response = await api.get('/auth/me')
+  return response.data
+}
+
+export const getProfile = async () => {
+  const response = await api.get('/users/')
+  return response.data
+}
+
+export const updateProfile = async (data: { phone_number: string; birth: string; sex: string }) => {
+  const response = await api.put('/users/', data)
+  return response.data
+}
+
+export const getLeagues = async () => {
+  const response = await api.get('/matches/leagues')
+  return response.data
+}
+
+export const getTeams = async () => {
+  const response = await api.get('/matches/teams')
+  return response.data
+}
+
+export const syncSofascoreRound = async (data: { tournament_id: number; season_id: number; round_num: number; league_id: string }) => {
+  const response = await api.post('/admin/sofascore/sync-round', data)
+  return response.data
+}
+
+export const syncSofascoreRoster = async (data: { sofascore_team_id: number; local_team_id: string }) => {
+  const response = await api.post('/admin/sofascore/sync-roster', data)
   return response.data
 }
 

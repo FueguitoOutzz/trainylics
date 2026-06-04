@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import uuid4
 from sqlmodel import SQLModel, Field, Relationship
 from app.model.mixins import TimeMixin
@@ -13,3 +13,5 @@ class Player(SQLModel, TimeMixin, table=True):
 
     team_id: Optional[str] = Field(default=None, foreign_key="team.id")
     team: Optional["Team"] = Relationship(back_populates="players")
+    
+    notes: List["Note"] = Relationship(back_populates="player")
