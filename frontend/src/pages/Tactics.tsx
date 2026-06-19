@@ -243,6 +243,35 @@ export default function Tactics() {
     setDraggedNodeId(null)
   }
 
+  // Touch Event Handlers for Mobile / Tablet Drag-and-Drop
+  const handleTouchStart = (nodeId: string) => {
+    setDraggedNodeId(nodeId)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!draggedNodeId || !fieldRef.current) return
+    
+    // Prevent scrolling when dragging on mobile
+    if (e.cancelable) {
+      e.preventDefault()
+    }
+    
+    const rect = fieldRef.current.getBoundingClientRect()
+    const touch = e.touches[0]
+    
+    let x = ((touch.clientX - rect.left) / rect.width) * 100
+    let y = ((touch.clientY - rect.top) / rect.height) * 100
+
+    x = Math.max(2, Math.min(98, x))
+    y = Math.max(2, Math.min(98, y))
+
+    setNodes(prev => prev.map(n => n.id === draggedNodeId ? { ...n, x, y } : n))
+  }
+
+  const handleTouchEnd = () => {
+    setDraggedNodeId(null)
+  }
+
   // Handle Player Assignment to Circle Node
   const handleAssignPlayer = (nodeId: string, playerId: string) => {
     setSelectedNodeIdForPlayer(null)
@@ -360,9 +389,9 @@ export default function Tactics() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3 items-start">
+      <div className="grid gap-6 xl:grid-cols-3 items-start">
         {/* Left Control Panel Form */}
-        <Card className="lg:col-span-1 border-border/60 bg-card">
+        <Card className="xl:col-span-1 border-border/60 bg-card">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-1.5">
               <Users className="h-5 w-5 text-primary" /> Configuración de Pizarra
@@ -448,7 +477,7 @@ export default function Tactics() {
         </Card>
 
         {/* Right main canvas soccer field */}
-        <Card className="lg:col-span-2 border-border/60 bg-card overflow-hidden">
+        <Card className="xl:col-span-2 border-border/60 bg-card overflow-hidden">
           <CardHeader className="pb-2 border-b">
             <div className="flex items-center justify-between">
               <div>
@@ -468,10 +497,13 @@ export default function Tactics() {
             {/* The Soccer Pitch Canvas */}
             <div 
               ref={fieldRef}
-              className="relative w-full max-w-[620px] aspect-[4/3] rounded-xl border border-emerald-500/30 overflow-hidden shadow-inner cursor-crosshair"
+              className="relative w-full max-w-[620px] aspect-[4/3] rounded-xl border border-emerald-500/30 overflow-hidden shadow-inner cursor-crosshair touch-none"
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
               style={{
                 background: "radial-gradient(circle at center, #1b4d22 10%, #113316 90%)"
               }}
@@ -511,6 +543,7 @@ export default function Tactics() {
                     {/* Circle representing the Player */}
                     <div 
                       onMouseDown={() => handleMouseDown(node.id)}
+                      onTouchStart={() => handleTouchStart(node.id)}
                       onClick={(e) => {
                         e.stopPropagation()
                         setSelectedNodeIdForPlayer(isNodeSelected ? null : node.id)

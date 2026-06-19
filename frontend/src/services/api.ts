@@ -74,4 +74,9 @@ export const syncSofascoreRoster = async (data: { sofascore_team_id: number; loc
   return response.data
 }
 
+export const syncTeamsInfo = async () => {
+  const response = await api.post('/admin/sofascore/sync-teams-info')
+  return response.data
+}
+
 export default api

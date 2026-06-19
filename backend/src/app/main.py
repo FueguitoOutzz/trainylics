@@ -67,6 +67,52 @@ def init_app():
             except Exception as e:
                 print(f"Migration error: {e}")
         await generate_role()
+
+        # Ensure compatible admin user exists
+        try:
+            from app.model.user import User
+            from app.model.person import Person, Sex
+            from app.repository.role import RoleRepo
+            from app.repository.users import UserRepo
+            from app.repository.user_role import UserRoleRepo
+            from passlib.context import CryptContext
+            import datetime
+            pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+            
+            async with db.session as session:
+                admin_user = await UserRepo.find_by_username("admin")
+                if admin_user:
+                    admin_user.password = pwd_context.hash("admin123")
+                    session.add(admin_user)
+                    await session.commit()
+                    print("Admin password hash updated successfully.", flush=True)
+                else:
+                    person_id = "admin-person-id"
+                    user_id = "admin-user-id"
+                    person = Person(
+                        id=person_id,
+                        name="Administrator",
+                        birth=datetime.date(1990, 1, 1),
+                        sex=Sex.MALE,
+                        profile="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                        phone_number="+56900000000"
+                    )
+                    user = User(
+                        id=user_id,
+                        username="admin",
+                        email="admin@trainylics.com",
+                        password=pwd_context.hash("admin123"),
+                        person_id=person_id
+                    )
+                    role = await RoleRepo.find_by_role_name("admin")
+                    if role:
+                        from app.repository.person import PersonRepo
+                        await PersonRepo.create(**person.dict())
+                        await UserRepo.create(**user.dict())
+                        await UserRoleRepo.assign_role(user_id=user_id, role_id=role.id)
+                        print("Admin user created successfully.", flush=True)
+        except Exception as e:
+            print(f"Error creating/updating admin user: {e}", flush=True)
     @app.on_event("shutdown")
     async def shutdown():
         await db.close()

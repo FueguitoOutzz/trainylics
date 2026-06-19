@@ -6,8 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import MatchResults from "@/components/match-results"
 import PredictionCard from "@/components/prediction-card"
-import StatsOverview from "@/components/stats-overview"
-import NotesBoard from "@/components/notes-board"
+
 
 import { useNavigate } from "react-router-dom"
 import api, { getMe } from '../services/api'
@@ -109,9 +108,9 @@ export default function SportsResultsPage() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 xl:grid-cols-3">
           {/* Match Results - Takes 2 columns */}
-          <div className="lg:col-span-2">
+          <div className="xl:col-span-2">
             <MatchResults />
           </div>
 
@@ -121,15 +120,7 @@ export default function SportsResultsPage() {
           </div>
         </div>
 
-        {/* Notes Section */}
-        <div className="mt-6">
-          <NotesBoard />
-        </div>
 
-        {/* Stats Overview */}
-        <div className="mt-8">
-          <StatsOverview accuracy={stats.accuracy} />
-        </div>
     </div>
   )
 }

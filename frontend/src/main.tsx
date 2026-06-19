@@ -11,6 +11,7 @@ import Profile from './pages/Profile'
 import AdminData from './pages/AdminData'
 import Clubs from './pages/Clubs'
 import Tactics from './pages/Tactics'
+import Notes from './pages/Notes'
 import Layout from './components/Layout'
 
 createRoot(document.getElementById('root')!).render(
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="home" element={<Home />} />
             <Route path="clubs" element={<Clubs />} />
             <Route path="tactics" element={<Tactics />} />
+            <Route path="notes" element={<Notes />} />
             <Route path="admin/users" element={<AdminUsers />} />
             <Route path="admin/data" element={<AdminData />} />
             <Route path="profile" element={<Profile />} />

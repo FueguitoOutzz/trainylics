@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 class TeamRead(SQLModel):
     id: str
     name: str
+    stadium: Optional[str] = None
+    sofascore_id: Optional[int] = None
 
 class MatchBase(SQLModel):
     date: datetime

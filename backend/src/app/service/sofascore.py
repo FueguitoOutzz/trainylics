@@ -12,6 +12,49 @@ from app.model.league import League
 
 logger = logging.getLogger("app.service.sofascore")
 
+STADIUM_MAPPING = {
+    3150: "Estadio Elías Figueroa Brander",
+    3151: "Estadio San Carlos de Apoquindo",
+    3152: "Estadio Municipal de San Felipe",
+    3153: "Estadio Santa Laura-Universidad SEK",
+    3154: "Estadio Fiscal de Talca",
+    3155: "Estadio Monumental David Arellano",
+    3156: "Estadio Municipal de La Pintana",
+    3157: "Estadio Municipal de La Cisterna",
+    3158: "Estadio Regional de Chinquihue",
+    3159: "Estadio Zorros del Desierto",
+    3160: "Estadio Ester Roa Rebolledo",
+    3161: "Estadio Nacional Julio Martínez Prádanos",
+    3162: "Estadio Bicentenario de La Florida",
+    3163: "Estadio El Teniente",
+    3164: "Estadio Huachipato-CAP Acero",
+    3165: "Estadio Francisco Sánchez Rumoroso",
+    3167: "Estadio El Cobre",
+    5031: "Estadio La Portada",
+    5032: "Estadio Sausalito",
+    5033: "Estadio Roberto Bravo Santibáñez",
+    5034: "Estadio Ester Roa Rebolledo",
+    5275: "Estadio Francisco Sánchez Rumoroso",
+    5276: "Estadio Tierra de Campeones",
+    5277: "Estadio Luis Valenzuela Hermosilla",
+    5278: "Estadio Nelson Oyarzún Arenas",
+    5601: "Estadio Regional Calvo y Bascuñán",
+    7029: "Estadio Nelson Oyarzún Arenas",
+    33595: "Estadio La Granja",
+    33596: "Estadio Tierra de Campeones",
+    39219: "Estadio Carlos Dittborn",
+    39220: "Estadio Lucio Fariña Fernández",
+    48242: "Estadio Nicolás Chahuán Nazar",
+    84875: "Estadio Municipal de Lo Barnechea",
+    89506: "Estadio Luis Valenzuela Hermosilla",
+    89508: "Estadio Municipal de San Bernardo",
+    119072: "Estadio Germán Becker",
+    243490: "Estadio Municipal Joaquín Muñoz García",
+    284197: "Estadio Ester Roa Rebolledo",
+    284309: "Estadio Municipal Leonel Sánchez Lineros",
+    331131: "Estadio Gustavo Ocaranza",
+}
+
 class SofascoreService:
 
     @staticmethod
@@ -135,10 +178,43 @@ class SofascoreService:
                         await session.refresh(home_team)
 
                 if not home_team:
-                    home_team = Team(name=home_name, league_id=league_id, sofascore_id=home_sofascore_id)
+                    stadium_name = None
+                    if home_sofascore_id:
+                        if home_sofascore_id in STADIUM_MAPPING:
+                            stadium_name = STADIUM_MAPPING[home_sofascore_id]
+                        else:
+                            try:
+                                detail_url = f"https://www.sofascore.com/api/v1/team/{home_sofascore_id}"
+                                r_stadium = requests.get(detail_url, headers=headers, impersonate="chrome", timeout=10)
+                                if r_stadium.status_code == 200:
+                                    stadium_name = r_stadium.json().get("team", {}).get("venue", {}).get("name")
+                            except Exception as e:
+                                logger.error(f"Error fetching stadium for home team: {e}")
+                            if not stadium_name:
+                                stadium_name = "Estadio no registrado"
+                    home_team = Team(name=home_name, league_id=league_id, sofascore_id=home_sofascore_id, stadium=stadium_name)
                     session.add(home_team)
                     await session.commit()
                     await session.refresh(home_team)
+                elif home_team.sofascore_id and (not home_team.stadium or home_team.stadium == "Estadio no registrado"):
+                    if home_team.sofascore_id in STADIUM_MAPPING:
+                        home_team.stadium = STADIUM_MAPPING[home_team.sofascore_id]
+                        session.add(home_team)
+                        await session.commit()
+                        await session.refresh(home_team)
+                    else:
+                        try:
+                            detail_url = f"https://www.sofascore.com/api/v1/team/{home_team.sofascore_id}"
+                            r_stadium = requests.get(detail_url, headers=headers, impersonate="chrome", timeout=10)
+                            if r_stadium.status_code == 200:
+                                stadium_name = r_stadium.json().get("team", {}).get("venue", {}).get("name")
+                                if stadium_name:
+                                    home_team.stadium = stadium_name
+                                    session.add(home_team)
+                                    await session.commit()
+                                    await session.refresh(home_team)
+                        except Exception as e:
+                            logger.error(f"Error updating stadium for home team: {e}")
 
                 # Get or create away team
                 away_team = None
@@ -161,10 +237,43 @@ class SofascoreService:
                         await session.refresh(away_team)
 
                 if not away_team:
-                    away_team = Team(name=away_name, league_id=league_id, sofascore_id=away_sofascore_id)
+                    stadium_name = None
+                    if away_sofascore_id:
+                        if away_sofascore_id in STADIUM_MAPPING:
+                            stadium_name = STADIUM_MAPPING[away_sofascore_id]
+                        else:
+                            try:
+                                detail_url = f"https://www.sofascore.com/api/v1/team/{away_sofascore_id}"
+                                r_stadium = requests.get(detail_url, headers=headers, impersonate="chrome", timeout=10)
+                                if r_stadium.status_code == 200:
+                                    stadium_name = r_stadium.json().get("team", {}).get("venue", {}).get("name")
+                            except Exception as e:
+                                logger.error(f"Error fetching stadium for away team: {e}")
+                            if not stadium_name:
+                                stadium_name = "Estadio no registrado"
+                    away_team = Team(name=away_name, league_id=league_id, sofascore_id=away_sofascore_id, stadium=stadium_name)
                     session.add(away_team)
                     await session.commit()
                     await session.refresh(away_team)
+                elif away_team.sofascore_id and (not away_team.stadium or away_team.stadium == "Estadio no registrado"):
+                    if away_team.sofascore_id in STADIUM_MAPPING:
+                        away_team.stadium = STADIUM_MAPPING[away_team.sofascore_id]
+                        session.add(away_team)
+                        await session.commit()
+                        await session.refresh(away_team)
+                    else:
+                        try:
+                            detail_url = f"https://www.sofascore.com/api/v1/team/{away_team.sofascore_id}"
+                            r_stadium = requests.get(detail_url, headers=headers, impersonate="chrome", timeout=10)
+                            if r_stadium.status_code == 200:
+                                stadium_name = r_stadium.json().get("team", {}).get("venue", {}).get("name")
+                                if stadium_name:
+                                    away_team.stadium = stadium_name
+                                    session.add(away_team)
+                                    await session.commit()
+                                    await session.refresh(away_team)
+                        except Exception as e:
+                            logger.error(f"Error updating stadium for away team: {e}")
 
                 # Check if match is played or upcoming
                 status_type = event.get("status", {}).get("type", "notstarted")
@@ -294,3 +403,103 @@ class SofascoreService:
 
             await session.commit()
         return synced_players
+
+    @classmethod
+    async def sync_teams_info(cls) -> dict:
+        import urllib.parse
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        synced_results = []
+        diagnostics = []
+        async with db.session as session:
+            # Fetch all teams
+            res = await session.execute(select(Team))
+            teams = res.scalars().all()
+            
+            diagnostics.append(f"Fetched {len(teams)} teams from database.")
+            
+            for team in teams:
+                updated = False
+                team_log = []
+                team_log.append(f"Processing '{team.name}' (ID: {team.id}, sofascore_id: {team.sofascore_id}, stadium: {team.stadium})")
+                
+                # 1. If sofascore_id is missing, search it
+                if not team.sofascore_id:
+                    query_encoded = urllib.parse.quote(team.name)
+                    search_url = f"https://www.sofascore.com/api/v1/search/all?q={query_encoded}"
+                    team_log.append(f"Searching: {search_url}")
+                    try:
+                        r = requests.get(search_url, headers=headers, impersonate="chrome", timeout=10)
+                        team_log.append(f"Search HTTP Status: {r.status_code}")
+                        if r.status_code == 200:
+                            results = r.json().get("results", [])
+                            team_log.append(f"Search results count: {len(results)}")
+                            found_team = False
+                            for item in results:
+                                if item.get("type") == "team":
+                                    entity = item.get("entity", {})
+                                    sport = entity.get("sport")
+                                    sport_name = sport.get("name", "").lower() if sport else ""
+                                    team_log.append(f"Found candidate: {entity.get('name')} (ID: {entity.get('id')}), sport: {sport_name}")
+                                    if "foot" in sport_name or "socc" in sport_name or not sport_name:
+                                        sofascore_id = entity.get("id")
+                                        if sofascore_id:
+                                            team.sofascore_id = sofascore_id
+                                            updated = True
+                                            found_team = True
+                                            team_log.append(f"Set sofascore_id to {sofascore_id}")
+                                            break
+                            if not found_team:
+                                team_log.append("No football team found in search results")
+                        else:
+                            team_log.append(f"Search failed body: {r.text[:200]}")
+                    except Exception as e:
+                        team_log.append(f"Search error: {str(e)}")
+                
+                # 2. If sofascore_id is present but stadium is missing, fetch details
+                if team.sofascore_id and (not team.stadium or team.stadium == "Estadio no registrado"):
+                    if team.sofascore_id in STADIUM_MAPPING:
+                        stadium_name = STADIUM_MAPPING[team.sofascore_id]
+                        team.stadium = stadium_name
+                        updated = True
+                        team_log.append(f"Set stadium to '{stadium_name}' from local mapping")
+                    else:
+                        detail_url = f"https://www.sofascore.com/api/v1/team/{team.sofascore_id}"
+                        team_log.append(f"Fetching details: {detail_url}")
+                        try:
+                            r = requests.get(detail_url, headers=headers, impersonate="chrome", timeout=10)
+                            team_log.append(f"Detail HTTP Status: {r.status_code}")
+                            if r.status_code == 200:
+                                team_info = r.json().get("team")
+                                venue = team_info.get("venue") if team_info else None
+                                stadium_name = venue.get("name") if venue else None
+                                team_log.append(f"Details venue: {venue}, stadium_name: {stadium_name}")
+                                if stadium_name:
+                                    team.stadium = stadium_name
+                                    updated = True
+                                    team_log.append(f"Set stadium to '{stadium_name}'")
+                                else:
+                                    team_log.append("No stadium/venue name found in details")
+                            else:
+                                team_log.append(f"Detail fetch failed body: {r.text[:200]}")
+                        except Exception as e:
+                            team_log.append(f"Detail fetch error: {str(e)}")
+                        
+                if updated:
+                    session.add(team)
+                    synced_results.append({
+                        "id": team.id,
+                        "name": team.name,
+                        "sofascore_id": team.sofascore_id,
+                        "stadium": team.stadium
+                    })
+                diagnostics.append(" | ".join(team_log))
+            
+            if synced_results:
+                await session.commit()
+                
+        return {
+            "synced_results": synced_results,
+            "diagnostics": diagnostics
+        }

@@ -348,7 +348,7 @@ export default function ClubsPage() {
                   <div className="w-20 h-20 bg-secondary/30 rounded-full flex items-center justify-center p-2 mb-4 relative group-hover:scale-105 transition-transform duration-300">
                     {team.sofascore_id ? (
                       <img 
-                        src={`https://www.sofascore.com/api/v1/team/${team.sofascore_id}/image`}
+                        src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${team.sofascore_id}/image`}
                         alt={team.name}
                         className="w-16 h-16 object-contain"
                         onError={(e) => {
@@ -389,7 +389,7 @@ export default function ClubsPage() {
                 <div className="w-14 h-14 bg-secondary/30 rounded-full flex items-center justify-center p-1.5 shrink-0">
                   {selectedTeam.sofascore_id ? (
                     <img 
-                      src={`https://www.sofascore.com/api/v1/team/${selectedTeam.sofascore_id}/image`}
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${selectedTeam.sofascore_id}/image`}
                       alt={selectedTeam.name}
                       className="w-10 h-10 object-contain"
                     />

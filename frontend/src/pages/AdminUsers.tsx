@@ -154,8 +154,8 @@ export default function AdminUsers() {
     <div className="min-h-screen bg-background p-8">
 
       <div className="container mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Admin Usuarios</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h1 className="text-3xl font-bold font-sans">Admin Usuarios</h1>
           <div className="flex gap-4">
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
               <DialogTrigger asChild>

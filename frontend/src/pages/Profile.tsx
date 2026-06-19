@@ -89,7 +89,7 @@ export default function Profile() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Usuario (No editable)</Label>
                 <Input value={profileData.username} disabled />
@@ -98,7 +98,7 @@ export default function Profile() {
                 <Label>Correo (No editable)</Label>
                 <Input value={profileData.email} disabled />
               </div>
-              <div className="space-y-2 col-span-2">
+              <div className="space-y-2 md:col-span-2">
                 <Label>Nombre Completo (No editable)</Label>
                 <Input value={profileData.name} disabled />
               </div>

@@ -35,7 +35,7 @@ export default function Register() {
         <CardHeader>
           <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
           <CardDescription>
-            Completa tus datos para registrarte en Trainytics.
+            Completa tus datos para registrarte en Trainylics.
           </CardDescription>
         </CardHeader>
         <CardContent>

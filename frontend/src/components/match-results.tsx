@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import api from '../services/api'
 import LeagueStandings from "./league-standings"
+import { Shield, MapPin } from "lucide-react"
 
 interface Match {
   id: number
@@ -14,9 +15,9 @@ interface Match {
   home_goals: number | null
   away_goals: number | null
   home_team_id: string
-  home_team: { name: string }
+  home_team: { name: string; sofascore_id?: number | null; stadium?: string | null }
   away_team_id: string
-  away_team: { name: string }
+  away_team: { name: string; sofascore_id?: number | null; stadium?: string | null }
   prediction?: string
 
   // Stats
@@ -232,7 +233,7 @@ export default function MatchResults() {
                         <div className="flex flex-col space-y-3">
                           {/* Home Team Row */}
                           <div className="flex items-center justify-between">
-                            <span className={`truncate text-sm flex items-center gap-2 ${
+                            <span className={`truncate text-sm flex items-center gap-2.5 ${
                               homeWin 
                                 ? "font-extrabold text-foreground text-base tracking-normal" 
                                 : awayWin 
@@ -241,9 +242,21 @@ export default function MatchResults() {
                                     ? "font-semibold text-sky-200/90" 
                                     : "font-semibold text-foreground"
                             }`}>
-                              {match.home_team?.name || `Team ${match.home_team_id}`}
+                              {match.home_team?.sofascore_id ? (
+                                <img
+                                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${match.home_team.sofascore_id}/image`}
+                                  alt=""
+                                  className="w-5 h-5 object-contain shrink-0"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <Shield className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                              )}
+                              <span className="truncate">{match.home_team?.name || `Team ${match.home_team_id}`}</span>
                               {homeWin && (
-                                <span className="text-[10px] uppercase font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shadow-sm border border-emerald-500/20">
+                                <span className="text-[10px] uppercase font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shadow-sm border border-emerald-500/20 shrink-0">
                                   Ganador
                                 </span>
                               )}
@@ -265,7 +278,7 @@ export default function MatchResults() {
 
                           {/* Away Team Row */}
                           <div className="flex items-center justify-between">
-                            <span className={`truncate text-sm flex items-center gap-2 ${
+                            <span className={`truncate text-sm flex items-center gap-2.5 ${
                               awayWin 
                                 ? "font-extrabold text-foreground text-base tracking-normal" 
                                 : homeWin 
@@ -274,9 +287,21 @@ export default function MatchResults() {
                                     ? "font-semibold text-sky-200/90" 
                                     : "font-semibold text-foreground"
                             }`}>
-                              {match.away_team?.name || `Team ${match.away_team_id}`}
+                              {match.away_team?.sofascore_id ? (
+                                <img
+                                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${match.away_team.sofascore_id}/image`}
+                                  alt=""
+                                  className="w-5 h-5 object-contain shrink-0"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <Shield className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                              )}
+                              <span className="truncate">{match.away_team?.name || `Team ${match.away_team_id}`}</span>
                               {awayWin && (
-                                <span className="text-[10px] uppercase font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shadow-sm border border-emerald-500/20">
+                                <span className="text-[10px] uppercase font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shadow-sm border border-emerald-500/20 shrink-0">
                                   Ganador
                                 </span>
                               )}
@@ -297,6 +322,12 @@ export default function MatchResults() {
                           </div>
                         </div>
 
+                        {/* Stadium Row */}
+                        <div className="mt-3 pt-2 border-t border-border/30 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="truncate">{match.home_team?.stadium || "Estadio no registrado"}</span>
+                        </div>
+
                         {isDraw && (
                           <div className="mt-3 flex justify-center">
                             <span className="text-[10px] uppercase tracking-widest font-black text-amber-400 bg-amber-500/10 px-3.5 py-1 rounded-full border border-amber-500/20 shadow-sm animate-pulse">
@@ -315,16 +346,50 @@ export default function MatchResults() {
                         <DialogTitle className="text-center pb-2 border-b mb-4">Estadísticas del Partido</DialogTitle>
                       </DialogHeader>
 
-                      <div className="flex justify-between items-center mb-6 px-4">
-                        <div className="text-center w-1/3">
-                          <span className="font-bold block text-lg">{match.home_goals ?? '-'}</span>
-                          <span className="text-sm font-medium leading-none">{match.home_team?.name}</span>
+                      <div className="flex justify-between items-center mb-4 px-2 bg-secondary/10 py-4 rounded-xl border border-border/50">
+                        <div className="flex flex-col items-center text-center w-[42%]">
+                          <div className="w-12 h-12 bg-card rounded-full flex items-center justify-center p-2 mb-2 shadow-sm border">
+                            {match.home_team?.sofascore_id ? (
+                              <img
+                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${match.home_team.sofascore_id}/image`}
+                                alt=""
+                                className="w-9 h-9 object-contain"
+                              />
+                            ) : (
+                              <Shield className="w-6 h-6 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className="text-xs font-bold leading-tight line-clamp-2">{match.home_team?.name}</span>
                         </div>
-                        <div className="text-xs font-bold text-muted-foreground">VS</div>
-                        <div className="text-center w-1/3">
-                          <span className="font-bold block text-lg">{match.away_goals ?? '-'}</span>
-                          <span className="text-sm font-medium leading-none">{match.away_team?.name}</span>
+
+                        <div className="flex flex-col items-center justify-center gap-1 w-[16%]">
+                          <div className="flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded text-primary font-bold text-sm">
+                            <span>{match.home_goals ?? '-'}</span>
+                            <span>:</span>
+                            <span>{match.away_goals ?? '-'}</span>
+                          </div>
+                          <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">VS</div>
                         </div>
+
+                        <div className="flex flex-col items-center text-center w-[42%]">
+                          <div className="w-12 h-12 bg-card rounded-full flex items-center justify-center p-2 mb-2 shadow-sm border">
+                            {match.away_team?.sofascore_id ? (
+                              <img
+                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${match.away_team.sofascore_id}/image`}
+                                alt=""
+                                className="w-9 h-9 object-contain"
+                              />
+                            ) : (
+                              <Shield className="w-6 h-6 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className="text-xs font-bold leading-tight line-clamp-2">{match.away_team?.name}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1 mb-6">
+                        <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Estadio: {match.home_team?.stadium || "No registrado"}</span>
                       </div>
 
                       <div className="space-y-5 px-1">
