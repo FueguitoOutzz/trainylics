@@ -232,11 +232,38 @@ async def get_league_standings(league_id: str, session: AsyncSession = Depends(g
         for team_id, stat in standings.items():
             stat["dg"] = stat["gf"] - stat["gc"]
             
-        # Convert to list and sort
-        standings_list = list(standings.values())
-        standings_list.sort(key=lambda x: (-x["pts"], -x["dg"], -x["gf"], x["team_name"].lower()))
+        # Check if any team has a group_name
+        has_groups = any(team.group_name is not None for team in teams)
         
-        return standings_list
+        if has_groups:
+            # Group by group_name. Any team with None group can go to "General"
+            groups_dict = {}
+            for team in teams:
+                g_name = team.group_name or "General"
+                if g_name not in groups_dict:
+                    groups_dict[g_name] = []
+                    
+            for team in teams:
+                g_name = team.group_name or "General"
+                groups_dict[g_name].append(standings[team.id])
+                
+            # Convert to list of dicts: [{"group_name": "Zona Norte", "rows": [...]}, ...]
+            grouped_standings = []
+            for g_name, rows in groups_dict.items():
+                # Sort rows within the group
+                rows.sort(key=lambda x: (-x["pts"], -x["dg"], -x["gf"], x["team_name"].lower()))
+                grouped_standings.append({
+                    "group_name": g_name,
+                    "rows": rows
+                })
+            # Sort the groups by name (e.g. Zona Norte, then Zona Sur)
+            grouped_standings.sort(key=lambda x: x["group_name"])
+            return grouped_standings
+        else:
+            # Convert to list and sort
+            standings_list = list(standings.values())
+            standings_list.sort(key=lambda x: (-x["pts"], -x["dg"], -x["gf"], x["team_name"].lower()))
+            return standings_list
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

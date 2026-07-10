@@ -1,0 +1,265 @@
+--- LEAGUES ---
+ID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d | Name: Liga de Ascenso | Season: 2025
+ID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16 | Name: Liga de Ascenso | Season: 2022
+ID: 7cf6b610-f419-426b-a56e-16d680a9cd0c | Name: Liga de Primera | Season: 2026
+ID: 8a1bcb77-89f2-4884-ab20-750da17f48ac | Name: Liga de Primera | Season: 2025
+ID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66 | Name: Liga de Ascenso | Season: 2026
+ID: b8f40800-8e29-4a45-adb2-250e3f3c63bf | Name: Liga de Ascenso | Season: 2024
+ID: bad4091f-ff55-4dca-87d7-8f9af542a08c | Name: Liga de Primera | Season: 2022
+ID: dc45aff8-66e3-4b37-9033-a60a4e1aa369 | Name: Liga de Primera | Season: 2024
+ID: f0a51327-f9c0-4535-baec-ffb6121254f2 | Name: Liga de Primera | Season: 2023
+ID: f6251388-49fe-4d9b-ac52-4568555abae7 | Name: Liga de Ascenso | Season: 2023
+ID: bb974fd5-17ea-4621-b834-ec34e0774f27 | Name: Liga de Segunda | Season: 2024
+ID: 884ee666-7781-4c84-bf2c-f59acddfe0a2 | Name: Liga de Segunda | Season: 2025
+ID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3 | Name: Liga de Segunda | Season: 2026
+ID: 981e4649-e149-435f-bd34-a512ea5a2c11 | Name: Tercera División A | Season: 2024
+ID: 7410b97f-a517-4315-9030-06a7386f22f6 | Name: Tercera División A | Season: 2025
+ID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e | Name: Tercera División A | Season: 2026
+
+--- TEAMS ---
+ID: 3c0525d0-b11f-4bc0-ae4b-61a249a25c88 | Name: Lautaro de Bui­n | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 879ddd12-f818-4dc4-9827-6d01213506b8 | Name: Arturo Fernández Vial | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 5bea67b8-1079-4162-be64-be22e09b1920 | Name: Deportes Puerto Montt | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 4ee6589f-7ab0-4e62-aa98-0d449f25f34d | Name: Provincial Ovalle | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: a340fb09-6245-442d-aea9-e5589f41b23e | Name: Deportes Linares | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 5904d96b-bae6-403e-9c9b-37aed5068fce | Name: Deportes Rengo | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: e71ce987-0dd9-4451-945d-04e2088ecf6d | Name: Deportes Concepción | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: fbe3d1c0-d647-47b9-b552-cda853bdaea8 | Name: Provincial Osorno | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: d4e05bd0-6076-4188-b1ac-93e447ff5aca | Name: CD Trasandino de Los Andes | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 1cf8684b-7d6b-4708-8002-3b5a28352bc5 | Name: Deportes Melipilla | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: c848d75b-be30-47d9-9507-81aa7fa321c8 | Name: General Velasquez | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 48961960-5274-449f-833d-efc1e17d31ff | Name: Real San Joaquín | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 4fdd1cb1-3af1-4acc-a786-f718b5022779 | Name: CD Concón National | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: f77425d1-d924-4c0d-a031-bfa9203c965e | Name: San Antonio Unido | LeagueID: bb974fd5-17ea-4621-b834-ec34e0774f27
+ID: 09786b8d-014f-4578-9948-75f29d69e719 | Name: Deportes Puerto Montt | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 6a44c702-3aff-4b01-9749-753a9de3a94c | Name: Provincial Osorno | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 10847726-6998-45f7-9dbc-aa42739a8114 | Name: Coquimbo Unido | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 182801db-436a-4089-bf1f-b11681f308db | Name: Unión Española | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 1c3ef3a8-003c-4157-85df-232f66a3a226 | Name: O'Higgins | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 1ed58433-0971-4cbe-a136-7e39ad10ddfe | Name: Ñublense | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 21dd570e-bfb7-4a34-9dce-95a1f2d2bcc4 | Name: Cobresal | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 23cc6c44-b1f1-4b01-bddb-fb981584d018 | Name: Universidad de Chile | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 27f72ce9-7cd9-4827-8e4a-193fb9e11825 | Name: Unión La Calera | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 28bf006e-ed69-485e-b093-5590c7505b35 | Name: Deportes Magallanes | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 28c43b9c-ca60-41a6-9cd0-4d03313b76b4 | Name: Audax Italiano | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 2e348d61-e956-4ec6-a9c4-64cfbc43d187 | Name: Everton de Viña del Mar | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 3ee0489c-4766-431f-8444-c9736d7ed216 | Name: Ñublense | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 440c7d4a-2ce5-4fcd-84f1-1ac68c57ce6b | Name: Curicó Unido | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 48d762b4-271a-4c00-92a9-c3724e10e061 | Name: Cobresal | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 4a774e2c-b5f9-4343-979c-cf964365db13 | Name: Deportes La Serena | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 98277427-1852-41b4-9f6d-5559ddf6e6fb | Name: CD Concón National | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 17104c35-19f5-4ce7-bfa4-5d6a4ba6ae4d | Name: Santiago City FC | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: d3c59096-2ba5-4a6e-aa90-9da1d9cba988 | Name: San Antonio Unido | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 1ede4543-d1f7-4468-b25f-2479b789b464 | Name: Real San Joaquín | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 513f1cd4-8aee-49a8-8d70-86ff87e1d187 | Name: Deportes Rengo | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 50bd5dca-6b03-453a-9856-2f5774b2282d | Name: Constitución Unido | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: ae3be122-a850-4c9d-a73e-f8ea2800478b | Name: CD Colchagua | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 6709d770-dcd1-47c2-b814-87d09c884b6c | Name: Brujas de Salamanca | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: b51ee41a-cd80-4b38-8b06-6032441f4216 | Name: Deportes Unión Compañías | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 5b1f27fb-ca1a-444c-8d61-ae6480feb9cd | Name: CDSC Iberia | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 82fb55ed-b2aa-4c08-a0be-7fb5c153d7c9 | Name: CD Municipal Mejillones | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 002497ea-1296-41e8-83cd-911d9b25770e | Name: Municipal Puente Alto | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 52c3064c-fb32-47b5-8263-0f1d0fed5b9d | Name: Deportes Quillón | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 4131c408-55e2-45e4-9fae-465553d0f7f8 | Name: CD Municipal Mejillones | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: d499efb4-1321-4803-9021-f09d2d17029c | Name: Chimbarongo FC | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 5ce669c3-74cd-49b3-9c87-f76a0ef7486a | Name: Quintero Unido FC | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: c6dd3df4-c66e-4b5f-be07-dc4a74a2f831 | Name: Brujas de Salamanca | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 0d55eb56-8063-4ac3-97ef-d7c9fc456759 | Name: Deportes Melipilla | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 508fe1b8-ce94-4f79-8db3-326de5133779 | Name: General Velasquez | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: a5359d10-7caa-4681-beb0-30cd34031790 | Name: CD Trasandino de Los Andes | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 6e17f03a-0af2-442e-9627-7c1fd1321ac4 | Name: Deportes Linares | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 089882a5-bfc7-4ce8-8a01-e154eb4a3947 | Name: AC Barnechea | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: 8bc1d0f0-2cf3-4528-8ea4-f519e0a09fe7 | Name: Provincial Ovalle | LeagueID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+ID: d09696e8-d406-4732-9adf-42b5ca0be0b1 | Name: Lautaro de Bui­n | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 1a3b61e0-f6cd-45a6-9675-b73aa8841589 | Name: CSDC Malleco Unido | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: b53be645-c0e3-4fce-9b1a-c83f0908ba4c | Name: Lota Schwager | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 7be00eb9-8502-4ab4-8e9f-1ea197ec0ce4 | Name: Brujas de Salamanca | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 4f9e6bc5-f35c-4ee3-a449-a38392228bf7 | Name: CD Concón National | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 55a498bc-8c7b-4a41-b1ee-351926bd2163 | Name: Real San Joaquín | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: c8b17d10-7b7f-4ab3-9041-354239e0a3c8 | Name: General Velasquez | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 3bd89465-c580-4bdc-bb9e-df933f5c76ec | Name: Santiago Morning | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 3ae40e34-e3e2-4d9c-94a8-cb002bc11ad7 | Name: Deportes Rengo | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 430546d1-1bac-4091-b672-6b49e3999734 | Name: Lota Schwager | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: f6405a51-8a7e-4e19-a2d5-a40e885d1b3d | Name: Municipal Puente Alto | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 62a65792-6520-44d7-82dc-8d995f4032bc | Name: CDSC Aguará | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 167a60fa-7259-45ee-a2c5-4180bda299de | Name: CDS Naval de Talcahuano | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 21690bad-9dc9-4492-99b2-9f5761e8caf7 | Name: Constitución Unido | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: b16e1205-b07b-4191-b64a-693adabd060d | Name: CD Imperial Unido | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: ba2c1631-f7fa-4de1-b557-a19249a33cd8 | Name: CD Colchagua | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 0e5d636e-1eed-483d-99be-89ab29274f10 | Name: Comunal Cabrero | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: 4d637440-f6ec-4904-a517-bbefcfcc5354 | Name: Atlético Colina | LeagueID: 7410b97f-a517-4315-9030-06a7386f22f6
+ID: c50c0b78-0cd9-4726-9782-61d50d253310 | Name: CDSC Aguará | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 2701fc4c-bd7f-4d02-8b86-0b1973f2202f | Name: Municipal Puente Alto | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 4592b2a3-27ea-4840-a666-5d303bc2f404 | Name: CDSC Deportes Rancagua | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 56a44e55-82ad-49d3-a211-e64f75d97619 | Name: Atlético Oriente | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 589c3620-5fa1-4078-a6cd-eb5edeaade29 | Name: CDS Naval de Talcahuano | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: df348b9c-57d2-4ccc-b530-64893bdfa698 | Name: Constitución Unido | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 07eed9f7-c307-461a-a8e4-0abc48bbeb2d | Name: Comunal Cabrero | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 696db824-4380-4552-8a20-9144c81a41eb | Name: Provincial Ovalle | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 2ded2c92-6e5c-43b6-be9c-03730da3cce6 | Name: CD Trasandino de Los Andes | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 1254cecf-bf9a-47f7-b4f0-2ad3f562a0be | Name: Santiago City FC | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 0ae03f99-3ff2-47c2-a4d2-05edc578d919 | Name: Deportes Linares | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 007336a5-6e97-4315-8d4f-48bb0319da3e | Name: Deportes Puerto Montt | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 022931ec-9714-49d7-9aa8-148de7c808a4 | Name: Universidad de Chile | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 02d76bde-4cb3-406e-a775-d1937e42a46d | Name: Palestino | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 048e788b-2659-438f-ba2f-d47cd17a5eb0 | Name: Deportes Magallanes | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 0b418707-5a4f-47c7-9e77-f66e0af26ae5 | Name: San Luis de Quillota | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 0b6dd6b3-6f19-4ec6-ae55-026904d06954 | Name: Deportes Concepción | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 0bec22e9-bd6c-4934-9791-6ae943e080a8 | Name: Deportes Iquique | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 0cc29d49-e85a-4087-9485-fbfe165336ff | Name: AC Barnechea | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 0d0b0223-6fce-41fe-86a8-e730f69b30f9 | Name: Arturo Fernández Vial | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 1042a65e-5e66-4220-8e37-f8b2f4d598e9 | Name: Santiago Morning | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 124c5638-b523-4eb3-b3dc-8d667092619c | Name: Deportes Melipilla | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 14c99a13-1c69-48c2-b88c-b29de2683049 | Name: Universidad Católica | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 1b0ab112-5c4e-414b-8f82-fcdb9f97bbb9 | Name: Universidad Católica | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 1b0daa21-4378-43c4-845d-4eaf9255248e | Name: Colo-Colo | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 1b6edc90-7a24-49ca-b241-c7011c87bdc6 | Name: O'Higgins | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 1c430758-d81d-4ebc-a0e2-7bff2ebfa63d | Name: Santiago Morning | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 1f0735cb-d8bf-4725-a931-fb834931baf2 | Name: Universidad de Concepción | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 20685ffd-6e87-49aa-80c0-f8abbb8ae6a3 | Name: Deportes La Serena | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 22840547-8e2a-4c8a-8009-c8437ff724e7 | Name: San Luis de Quillota | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 274515ba-c620-4fd3-859a-516684364f34 | Name: Audax Italiano | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 28ada7dd-110c-4b66-8095-2451848c21c0 | Name: Palestino | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 28c95569-6f57-4014-8e22-7d1e7e201339 | Name: San Marcos de Arica | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 2abc0a6e-ba4b-4df5-ad2b-bf7b622bedbe | Name: Deportes Copiapó | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 3013cab8-a5ab-47fa-9dbc-b808eb7c8bfc | Name: Club Deportes Antofagasta | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 31445b44-8320-4c4e-a5a2-8120a72bef0c | Name: Rangers de Talca | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 3334a2b2-ffc0-4b42-a21f-be8cd927f319 | Name: Coquimbo Unido | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 349dbeb2-2a03-4750-a1ea-54abd3f84ddc | Name: Deportes Puerto Montt | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 35196752-8ed8-482c-b799-8ea882068146 | Name: Rangers de Talca | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 3641771b-7bac-4c61-a127-82e1f13e27af | Name: Curicó Unido | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 3af17390-f0db-48a4-8aeb-9431c61bee4e | Name: Deportes Recoleta | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 3c330514-f28a-4d61-af2a-f2eb4967539d | Name: Cobreloa | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 3c65a8a8-338c-417c-bc57-54053f18a332 | Name: Unión San Felipe | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 3e514365-275e-488b-b120-ac1b3feaf64f | Name: Colo-Colo | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 4066c6a4-901a-4545-b6fe-056e8e0f4c70 | Name: Deportes Temuco | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 419d72bc-8e32-405e-b09c-79278c930a8a | Name: Deportes Temuco | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 48d14d9c-80fd-4163-866c-1e1ab895ac71 | Name: Ñublense | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 4b72e6ea-6a49-4118-91d7-0aedf005cb6d | Name: Cobreloa | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 4ec6da57-fb67-43cd-81cc-09220e142742 | Name: Deportes Iquique | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 4fd8f029-2fc4-483c-8747-4796974e9701 | Name: Unión La Calera | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 54c313bb-5cab-46d8-b663-e72c9cc05a81 | Name: Deportes Iquique | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 5887ab2e-daf2-46b8-babb-8f8e962b23a6 | Name: Deportes Iquique | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 58dfa7ed-f47c-43ba-80a8-ad55edef803d | Name: Universidad Católica | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 58f537c4-aa1a-4425-a9a1-2078584d4c7d | Name: Deportes Recoleta | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 597db3fe-bc2f-49e2-b03c-81fa67ed06e1 | Name: San Luis de Quillota | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 5c3a4b27-79d7-454d-978e-cd29b0801e80 | Name: Huachipato | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 5d8f26c4-8950-4ffa-acc9-e36493037d36 | Name: Rangers de Talca | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 5f590869-9ad5-4c7d-88d5-4dbb63787ea5 | Name: Club Deportes Antofagasta | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 60650f70-26c7-4535-945b-ca3dafa2bc71 | Name: Deportes Temuco | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 6080bdbf-3d19-4670-a367-43ee6d831669 | Name: Unión La Calera | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 647ed659-02d4-4b40-860d-92563ba11c94 | Name: Deportes Copiapó | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 65824fc8-8d07-4331-a7f5-a9cbd712a968 | Name: Deportes Recoleta | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 65efb892-542c-44c7-9818-17343cc9a44d | Name: AC Barnechea | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 679bfe02-75a4-4d9b-9b1d-0dc691346c99 | Name: Deportes Santa Cruz | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 68812ac1-9e73-4094-bdd8-5f870641db57 | Name: Deportes Recoleta | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 68d292e8-78a6-4c14-8691-8ae227b65447 | Name: Unión Española | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 6a4f6208-8e5b-434b-a44a-c9ebfe6b0264 | Name: O'Higgins | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 6c7a9386-f6ee-4f43-8a3b-820e8fcc6e81 | Name: Ñublense | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 6f9555a1-66ae-4482-8302-026a15813e52 | Name: Audax Italiano | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 70f31e4d-a7f0-40ad-99f1-e5d004dfc071 | Name: Deportes Puerto Montt | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 71d0c429-8f2f-443c-94e5-74084f59f7e5 | Name: Curicó Unido | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 736bf781-195c-48d0-b2e0-3b22dc6b0fe9 | Name: Palestino | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 74a6850b-cad0-43b5-aca6-5de986916fa9 | Name: Club Deportes Antofagasta | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 765f18e3-444b-495f-bbbb-8486b99cdb79 | Name: Deportes Santa Cruz | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 766161ea-caa8-47c7-b2fa-696c22831373 | Name: Cobresal | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 79bdc231-3c37-4825-9c10-87c48ba8f614 | Name: Deportes Limache | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 7a0d67ed-5039-42df-bcb8-233f0346ac26 | Name: Coquimbo Unido | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 7bc4d1d4-0d50-4a3e-ab12-89a64fed7957 | Name: Santiago Wanderers | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 7be47e35-9c5c-4693-b3de-2ed1a25d3f53 | Name: Universidad de Concepción | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 7c2184e7-59f2-4f7d-835d-4e5b6e9c3c60 | Name: Coquimbo Unido | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 7c8bcb90-1fdc-4925-bfad-c6c5a04bea16 | Name: San Marcos de Arica | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 7e16d433-75f1-471f-b760-96d45b09a9d0 | Name: Universidad de Concepción | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 8030a2a2-f69a-4562-aeed-f44fb737b8f4 | Name: Huachipato | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: 818325ac-0564-4681-9d68-6b47614e0d34 | Name: Everton de Viña del Mar | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 81b7d049-45d6-4f83-b30e-7024bd0d1235 | Name: Colo-Colo | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 82ef7c7b-9fb0-4f90-924c-00e279fcf8ab | Name: Deportes Limache | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 8371ce47-4b86-4d4c-b243-85f31f910a56 | Name: Curicó Unido | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 864ce821-a92f-4d36-ba7c-15feaa30a890 | Name: Deportes Copiapó | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 8689c753-c6fa-404b-8302-524aabeab2c5 | Name: Deportes Santa Cruz | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 8704d90e-afaa-4f7a-97ea-0e31a43bff12 | Name: Deportes Copiapó | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: 87a7ff36-001c-4535-945c-4966b5309ba2 | Name: Deportes Magallanes | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 88ffe2b7-fc56-4bcd-a4cb-c9e936597516 | Name: Universidad de Chile | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 89aa1c74-c366-459d-bbf0-ebdf9a25d81b | Name: Deportes La Serena | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 89f905c1-742e-47a2-ae83-11cf1ec16cff | Name: Cobreloa | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 8b46124c-bb04-4298-b127-86720ba4f69d | Name: Colo-Colo | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 8c632bec-3524-4fa7-bf0f-71103758fa31 | Name: Unión San Felipe | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 8d44cf5c-220c-4978-a263-46bf9fe974da | Name: O'Higgins | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: 90d16f5b-a216-4a96-9df2-f40a95c46ad1 | Name: Santiago Wanderers | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: 91d3fe05-4cc5-42c7-afe8-7a66d9a7bb76 | Name: Huachipato | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: 92aca88f-d6d1-4473-ac42-b8340ecf4efb | Name: Rangers de Talca | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 962d8bbb-d206-420b-8657-a39a7c0dc689 | Name: Universidad de Concepción | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 96888484-3ea5-425a-bddd-3a9b26a80a7c | Name: Everton de Viña del Mar | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 9818b80e-f051-4e7e-850c-02c5417412d6 | Name: Deportes Santa Cruz | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 98afb4ec-bb44-4dec-b003-a72fa80aa03d | Name: Deportes La Serena | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: 98c6b77c-8bff-446d-9b10-eb7bf36374ae | Name: Palestino | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: 991301f6-fe58-402e-8782-47c3451fd168 | Name: Cobreloa | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: 992af92a-2234-49d0-b5f5-26e6389cb276 | Name: Deportes Limache | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: 9ac0e88d-c6ff-4138-9abe-37d35e2bffbc | Name: San Luis de Quillota | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: a1cf34fa-e24f-43cb-86fa-76e6b555a15d | Name: Universidad de Concepción | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: a4edf7f8-1d0a-4954-99a4-12671cd3b98b | Name: Unión San Felipe | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: a51dca0e-3032-481a-a986-3317a2f6933f | Name: Deportes Santa Cruz | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: a774fc63-83af-4dd5-b668-b5ce1adef6ea | Name: Deportes Temuco | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: aa042126-0c75-4223-a24f-a44f49a2e9e8 | Name: Santiago Wanderers | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: ad2487d1-01aa-4cc5-b913-fa7cff6eb2f1 | Name: Unión Española | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: ad7d3bef-98f7-4e19-9b7f-79d6c8bc84c6 | Name: Everton de Viña del Mar | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: afef64df-11b9-4407-966a-f5d0e0ef6676 | Name: Audax Italiano | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: b09b0db4-c0fc-4131-8809-c76e47598ec7 | Name: Cobresal | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: b19918e1-c5b9-435e-9da5-452655ff2ec2 | Name: Deportes Iquique | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: b5f52276-d07c-40ae-85e7-091b51d0f692 | Name: Unión San Felipe | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: b7656ced-4c99-4ffe-89d0-24187be7007c | Name: Unión La Calera | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: b7c94cd6-1c4a-4a78-9aee-b5a965350de8 | Name: Universidad Católica | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: c01257d5-0219-4626-ae5b-a7d53199a235 | Name: Deportes Recoleta | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: c01d3dce-1548-4e7c-b8d9-8a879ac4a88b | Name: Cobresal | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: c1ab8ed3-7ee7-4016-afe4-7c0ec9e94d52 | Name: Everton de Viña del Mar | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: c3cd9c08-7d5b-46a7-883d-fff72a182d70 | Name: San Marcos de Arica | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: c4740ff0-668c-4577-8d3f-ab3065efb881 | Name: Unión Española | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: c746072b-8465-410c-9ad9-132388341285 | Name: Deportes Concepción | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: c7f5222a-340f-4955-aba7-42b9e52b2ed6 | Name: Santiago Wanderers | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: c91525e4-9f9b-437c-896b-b4f1b75c9cae | Name: Colo-Colo | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: ca79bf14-933f-4754-8952-648c91948f0d | Name: Curicó Unido | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: cb4fb05c-d8f1-4321-84f5-943ce8195d0c | Name: Deportes Copiapó | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: cfffaec6-1ed6-4e1b-b3c1-bd076a9d239b | Name: Universidad Católica | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: d09f11ed-c856-418e-b638-220447f97014 | Name: Deportes Magallanes | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: d174850a-ccc7-4def-bbbb-94d054d68976 | Name: Huachipato | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: d272e6c4-da1f-46c2-b30b-33131321f190 | Name: Deportes Magallanes | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: d3daacaf-6649-4f33-9e76-26b15b1f6d75 | Name: Audax Italiano | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: dbe32e26-1812-49e5-bbdd-62d4a07c91e2 | Name: Universidad de Chile | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: de8372c8-2511-48c9-b8dd-1ff7c497c67d | Name: San Marcos de Arica | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: dea519a2-f052-4209-b87c-288d18dc1954 | Name: Universidad de Chile | LeagueID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+ID: e18bd8f8-7f32-4ea3-b764-76807afd175f | Name: Santiago Morning | LeagueID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+ID: e2b31824-9231-4249-9868-e35315826b7d | Name: Cobreloa | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: e3871f0c-a11f-44b0-9507-f25c0324e411 | Name: Ñublense | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: e5cfc618-52d3-4810-811a-f0a59e1754cb | Name: San Luis de Quillota | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: e66385b7-f266-444f-bf31-ee50fe54652e | Name: Deportes La Serena | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: e95f6666-a2b5-4f76-9fb1-e75750b69225 | Name: Rangers de Talca | LeagueID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+ID: ea861d83-8b5f-4569-a38e-5b12352a824e | Name: Palestino | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: eba55716-d7d8-44de-b1f2-c0b88d97126c | Name: Unión Española | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: ebcad1dd-3344-40df-baa9-9e8d6459ed24 | Name: Coquimbo Unido | LeagueID: f0a51327-f9c0-4535-baec-ffb6121254f2
+ID: eecbfc72-4338-4c74-9d3c-4737c16a1b9a | Name: Santiago Morning | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: f1eabd71-eeea-43d0-803e-becddfbac450 | Name: Unión San Felipe | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: f3f6b3fb-4960-42c8-af93-654abf6d59e1 | Name: Deportes Temuco | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: f7eeab6d-2b2d-4926-a1ee-091c22ab3ba8 | Name: Huachipato | LeagueID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+ID: fab1c6eb-ab37-478d-bf21-be6304afb52e | Name: Santiago Wanderers | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: fc048d30-5fd5-4365-b190-1b6867e1dbc2 | Name: O'Higgins | LeagueID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+ID: fce2b5e4-eead-4f39-a880-d30f1b037ee0 | Name: AC Barnechea | LeagueID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+ID: fdc88622-330c-403d-941e-1a7060b2b317 | Name: Unión La Calera | LeagueID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+ID: ff5a9b3b-66ce-4219-95aa-a33bc45f0af0 | Name: Club Deportes Antofagasta | LeagueID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+ID: ff79f3b7-0c7d-47b5-aa77-310e0b5cb45d | Name: Club Deportes Antofagasta | LeagueID: f6251388-49fe-4d9b-ac52-4568555abae7
+ID: 5b8b5ad7-b150-40c1-bb68-9d47d91a72ff | Name: CD Colchagua | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: af78b85c-9c23-4558-a180-8ac9cd527ed9 | Name: Provincial Osorno | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: 60e50164-77c9-46f3-bbe1-132892e7b72e | Name: Atlético Colina | LeagueID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+ID: af9cc929-6af8-40a9-9bff-0e28b38b5f48 | Name: Santiago City FC | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 4fa75cc5-5a31-47e5-ad9e-880ff35af468 | Name: CD Imperial Unido | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 267dbbc5-653e-48e9-baab-a8bfd4c2df30 | Name: Deportes Quillón | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 81b3f200-40fb-46ad-89e2-c23bbb40fff1 | Name: Deportes Valdivia | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: a5537f1f-87c2-417b-8543-0578c70b25b5 | Name: Comunal Cabrero | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: 737235cb-3bae-4c82-a999-635e02c9dbdd | Name: Chimbarongo FC | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: b531c784-c497-442b-ab94-3bddfd9c7dfc | Name: Atlético Colina | LeagueID: 981e4649-e149-435f-bd34-a512ea5a2c11
+ID: cdad3da1-b359-402b-a8a4-3ba41b565853 | Name: CSD Rodelindo Román | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: ea6f88f2-951e-4061-ac7b-f7bcc94dbd45 | Name: CSDC Malleco Unido | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: f1a597d6-f67f-46f1-be5c-1a35379c8353 | Name: Chimbarongo FC | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 892800d6-7800-4557-9560-3a632b484a9e | Name: Lautaro de Bui­n | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: a025d2e4-d012-4580-9953-e14723c76504 | Name: Futuro FC | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 0a6fe173-1456-4767-a2c3-4da87cfafed3 | Name: CD Imperial Unido | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+ID: 3a81d22b-b300-4032-a477-19e8acb28db9 | Name: Quintero Unido FC | LeagueID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e

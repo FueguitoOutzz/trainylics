@@ -32,6 +32,9 @@ Al analizar el esquema físico actual de la base de datos PostgreSQL, determinam
 *   **RF-09 (Pizarra Táctica 2D):** El sistema debe proporcionar una cancha interactiva donde el entrenador visualice los 11 jugadores según formaciones base predefinidas (`4-3-3`, `4-4-2`, `3-5-2`, `4-2-3-1`, `5-3-2`).
 *   **RF-10 (Edición de Fichas en Pizarra):** El entrenador debe poder arrastrar las fichas de los jugadores para reposicionarlos libremente en el campo de juego, asignarles jugadores específicos del club seleccionado y escribir instrucciones estratégicas personalizadas.
 *   **RF-11 (Persistencia de Tácticas):** El sistema debe permitir crear, actualizar (guardar cambios) y eliminar esquemas tácticos directamente desde la interfaz, persistiendo el título, descripción, formación y las posiciones en formato JSON.
+*   **RF-12 (Módulo de Scouting de Notas):** El sistema debe contar con un módulo de scouting independiente accesible desde la barra de navegación para la gestión dedicada de notas de jugadores y equipos.
+*   **RF-13 (Caché y Proxy de Escudos):** El backend debe exponer un endpoint proxy de descarga y caché de escudos que evite el hotlinking directo a dominios externos protegidos por Cloudflare (403 Forbidden/CORS).
+
 
 ### Requerimientos No Funcionales (RNF)
 *   **RNF-01 (Rendimiento):** Las consultas de cálculo de posiciones dinámicas deben responder en menos de 500ms mediante el indexado correcto de llaves foráneas.
@@ -39,6 +42,8 @@ Al analizar el esquema físico actual de la base de datos PostgreSQL, determinam
 *   **RNF-03 (Portabilidad):** Todo el entorno de desarrollo y producción debe desplegarse de manera portable utilizando Docker y Docker Compose.
 *   **RNF-04 (Concurrencia):** El backend debe soportar peticiones asíncronas concurrentes utilizando la arquitectura `FastAPI` y controladores `async/await` de SQLAlchemy/SQLModel.
 *   **RNF-05 (Interactividad en Tiempo Real):** El arrastre de las fichas tácticas y la reordenación de la cancha interactiva debe ejecutarse sin retardo de renderizado (60 FPS) mediante manipulación directa de eventos de ratón en el DOM.
+*   **RNF-06 (Resiliencia de APIs Externas):** El backend debe contar con un mecanismo de resolución local fallback (como un diccionario interno de estadios y un agente de usuario móvil para descargar escudos) que garantice el correcto funcionamiento del sistema incluso si la API pública de Sofascore no está disponible o bloquea las peticiones.
+
 
 ---
 
@@ -101,7 +106,7 @@ trainylics/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/          # Componentes visuales (match-results, notes-board, Layout)
-│   │   ├── pages/               # Vistas principales (Home, Admin, Login, Profile, Tactics)
+│   │   ├── pages/               # Vistas principales (Home, Admin, Login, Profile, Tactics, Notes)
 │   │   ├── services/            # Clientes de API (Axios wrapper)
 │   │   └── App.tsx              # Configuración de rutas y enrutador global
 │   └── Dockerfile

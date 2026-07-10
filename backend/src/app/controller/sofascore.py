@@ -61,6 +61,20 @@ async def sync_teams_info(_=Depends(RoleChecker(["admin"]))):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.post("/auto-sync", response_model=ResponseSchema)
+async def auto_sync(_=Depends(RoleChecker(["admin"]))):
+    """
+    Sincroniza automáticamente las jornadas actuales de todas las ligas activas (Primera A y Ascenso)
+    """
+    try:
+        await SofascoreService.auto_sync_current_rounds()
+        return ResponseSchema(
+            detail="Sincronización automática de jornadas actuales completada con éxito.",
+            result=None
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.get("/debug-search")
 async def debug_search(q: str = "Colo-Colo"):
     import urllib.parse
@@ -119,3 +133,4 @@ async def get_team_image(sofascore_id: int):
             raise HTTPException(status_code=404, detail="Team logo not found")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to retrieve team logo: {str(e)}")
+

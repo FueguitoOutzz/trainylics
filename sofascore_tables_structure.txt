@@ -1,0 +1,32 @@
+
+--- TOURNAMENT 18834 | SEASON 58333 (2024) ---
+Found 1 standings tables.
+  Table 0: name='Segunda División 2024', type='total', group_name='None', group_id='None'
+    Teams in table: Deportes Concepción, Deportes Melipilla, Deportes Puerto Montt, Deportes Rengo, San Antonio Unido, General Velasquez, Provincial Osorno, Provincial Ovalle, CD Concón National, CD Trasandino de Los Andes, Deportes Linares, Real San Joaquín, Lautaro de Bui­n, Arturo Fernández Vial
+
+--- TOURNAMENT 18834 | SEASON 68205 (2025) ---
+Found 1 standings tables.
+  Table 0: name='Liga de Segunda 2025', type='total', group_name='None', group_id='None'
+    Teams in table: Deportes Puerto Montt, Deportes Linares, Brujas de Salamanca, Provincial Osorno, Provincial Ovalle, CD Concón National, General Velasquez, CD Trasandino de Los Andes, Real San Joaquín, Santiago City FC, Deportes Rengo, Deportes Melipilla, San Antonio Unido
+
+--- TOURNAMENT 18834 | SEASON 86895 (2026) ---
+Found 2 standings tables.
+  Table 0: name='Liga de Segunda, Zona Norte 2026', type='total', group_name='None', group_id='None'
+    Teams in table: Santiago City FC, Brujas de Salamanca, CD Concón National, CD Trasandino de Los Andes, Real San Joaquín, Atlético Colina, Provincial Ovalle
+  Table 1: name='Liga de Segunda, Zona Sur 2026', type='total', group_name='None', group_id='None'
+    Teams in table: Provincial Osorno, CD Colchagua, Deportes Linares, General Velasquez, Lota Schwager, Deportes Rengo, Santiago Morning
+
+--- TOURNAMENT 22063 | SEASON 58763 (2024) ---
+Found 1 standings tables.
+  Table 0: name='Tercera División A 2024', type='total', group_name='None', group_id='None'
+    Teams in table: Santiago City FC, Brujas de Salamanca, Atlético Colina, CD Colchagua, Chimbarongo FC, CD Imperial Unido, Constitución Unido, Deportes Valdivia, Deportes Quillón, Municipal Puente Alto, CD Municipal Mejillones, Comunal Cabrero, CDSC Iberia, Deportes Unión Compañías
+
+--- TOURNAMENT 22063 | SEASON 70755 (2025) ---
+Found 1 standings tables.
+  Table 0: name='Tercera División A 2025', type='total', group_name='None', group_id='None'
+    Teams in table: Atlético Colina, CD Colchagua, Lota Schwager, Comunal Cabrero, CD Imperial Unido, CSDC Malleco Unido, CDS Naval de Talcahuano, Lautaro de Bui­n, CDSC Aguará, Municipal Puente Alto, Constitución Unido, Quintero Unido FC, Chimbarongo FC, Deportes Quillón, CD Municipal Mejillones
+
+--- TOURNAMENT 22063 | SEASON 91199 (2026) ---
+Found 1 standings tables.
+  Table 0: name='Tercera División A 2026', type='total', group_name='None', group_id='None'
+    Teams in table: Quintero Unido FC, Lautaro de Bui­n, CSDC Malleco Unido, CDS Naval de Talcahuano, CDSC Aguará, Comunal Cabrero, Atlético Oriente, Constitución Unido, CDSC Deportes Rancagua, CSD Rodelindo Román, CD Imperial Unido, Chimbarongo FC, Municipal Puente Alto, Futuro FC

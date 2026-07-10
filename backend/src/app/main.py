@@ -57,6 +57,7 @@ def init_app():
         async with db.session as session:
             try:
                 await session.execute(text("ALTER TABLE team ADD COLUMN IF NOT EXISTS sofascore_id INTEGER"))
+                await session.execute(text("ALTER TABLE team ADD COLUMN IF NOT EXISTS group_name VARCHAR"))
                 await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS category VARCHAR DEFAULT 'general'"))
                 await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS rating INTEGER"))
                 await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS team_id VARCHAR"))
@@ -66,6 +67,48 @@ def init_app():
                 await session.commit()
             except Exception as e:
                 print(f"Migration error: {e}")
+        # Ensure compatible admin user exists
+        try:
+            from curl_cffi import requests
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+            mappings = {
+                18834: {
+                    "2024": 58333,
+                    "2025": 68205,
+                    "2026": 86895
+                },
+                22063: {
+                    "2024": 58763,
+                    "2025": 70755,
+                    "2026": 91199
+                }
+            }
+            with open(r"c:\Users\renat\OneDrive\Desktop\trainylics\sofascore_tables_structure.txt", "w", encoding="utf-8") as f:
+                for t_id, seasons in mappings.items():
+                    for year, s_id in seasons.items():
+                        url = f"https://www.sofascore.com/api/v1/unique-tournament/{t_id}/season/{s_id}/standings/total"
+                        f.write(f"\n--- TOURNAMENT {t_id} | SEASON {s_id} ({year}) ---\n")
+                        try:
+                            r = requests.get(url, headers=headers, impersonate="chrome", timeout=15)
+                            if r.status_code == 200:
+                                data = r.json()
+                                standings = data.get("standings", [])
+                                f.write(f"Found {len(standings)} standings tables.\n")
+                                for idx, std in enumerate(standings):
+                                    name = std.get("name", "N/A")
+                                    group_info = std.get("group", {})
+                                    f.write(f"  Table {idx}: name='{name}', type='{std.get('type')}', group_name='{group_info.get('name') if group_info else None}', group_id='{group_info.get('id') if group_info else None}'\n")
+                                    rows = std.get("rows", [])
+                                    f.write(f"    Teams in table: {', '.join([row.get('team', {}).get('name') for row in rows])}\n")
+                            else:
+                                f.write(f"  Error fetching: {r.status_code}\n")
+                        except Exception as e2:
+                            f.write(f"  Request exception: {e2}\n")
+        except Exception as e:
+            print(f"Sofascore dump error: {e}")
+
         await generate_role()
 
         # Ensure compatible admin user exists
@@ -113,6 +156,50 @@ def init_app():
                         print("Admin user created successfully.", flush=True)
         except Exception as e:
             print(f"Error creating/updating admin user: {e}", flush=True)
+
+        # Temporarily sync group names for Liga de Segunda 2026 on startup to populate database
+        try:
+            from app.model.league import League
+            from sqlalchemy import select
+            import asyncio
+            from app.service.sofascore import SofascoreService
+            
+            async def run_sync_and_verify():
+                await asyncio.sleep(5)  # Wait for startup to settle
+                async with db.session_factory() as session:
+                    try:
+                        res = await session.execute(
+                            select(League).where(League.name == "Liga de Segunda", League.season == "2026")
+                        )
+                        league = res.scalars().first()
+                        if league:
+                            print("Running startup group sync for Liga de Segunda 2026...", flush=True)
+                            await SofascoreService.sync_team_groups(18834, 86895, league.id)
+                            print("Startup group sync completed for Liga de Segunda 2026.", flush=True)
+                    except Exception as ex:
+                        print(f"Error during startup group sync: {ex}", flush=True)
+                        
+            asyncio.create_task(run_sync_and_verify())
+        except Exception as e:
+            print(f"Error starting startup group sync: {e}", flush=True)
+
+        # Start background sync task loop
+        import asyncio
+        from app.service.sofascore import SofascoreService
+
+        async def sync_loop():
+            # Wait 30 seconds after startup to let the app initialize and stabilize
+            await asyncio.sleep(30)
+            while True:
+                try:
+                    await SofascoreService.auto_sync_current_rounds()
+                except Exception as e:
+                    print(f"Error in background sync loop: {e}", file=sys.stderr, flush=True)
+                # Sleep for 12 hours
+                await asyncio.sleep(12 * 3600)
+
+        asyncio.create_task(sync_loop())
+
     @app.on_event("shutdown")
     async def shutdown():
         await db.close()

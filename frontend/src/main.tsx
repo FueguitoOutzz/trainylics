@@ -13,26 +13,29 @@ import Clubs from './pages/Clubs'
 import Tactics from './pages/Tactics'
 import Notes from './pages/Notes'
 import Layout from './components/Layout'
+import { ThemeProvider } from './components/theme-provider'
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<Login />} />
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />}>
+            <Route index element={<Login />} />
 
-          {/* Authenticated Layout Wrapper */}
-          <Route element={<Layout />}>
-            <Route path="home" element={<Home />} />
-            <Route path="clubs" element={<Clubs />} />
-            <Route path="tactics" element={<Tactics />} />
-            <Route path="notes" element={<Notes />} />
-            <Route path="admin/users" element={<AdminUsers />} />
-            <Route path="admin/data" element={<AdminData />} />
-            <Route path="profile" element={<Profile />} />
+            {/* Authenticated Layout Wrapper */}
+            <Route element={<Layout />}>
+              <Route path="home" element={<Home />} />
+              <Route path="clubs" element={<Clubs />} />
+              <Route path="tactics" element={<Tactics />} />
+              <Route path="notes" element={<Notes />} />
+              <Route path="admin/users" element={<AdminUsers />} />
+              <Route path="admin/data" element={<AdminData />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 )

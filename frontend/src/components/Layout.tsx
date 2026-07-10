@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation, Outlet } from "react-router-dom"
-import { Trophy, ChevronDown, Menu, Shield, User, LogOut, LayoutDashboard, Settings, RefreshCw, BarChart2, MessageSquare } from "lucide-react"
+import { Trophy, ChevronDown, Menu, Shield, User, LogOut, LayoutDashboard, Settings, RefreshCw, BarChart2, MessageSquare, Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import api, { getMe } from '../services/api'
+import { useTheme } from "next-themes"
 
 export default function Layout() {
   const navigate = useNavigate()
@@ -12,6 +13,7 @@ export default function Layout() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
 
   // Verify authentication on mount
   useEffect(() => {
@@ -69,14 +71,12 @@ export default function Layout() {
         {/* Brand */}
         <div 
           onClick={() => navigate('/home')}
-          className="p-6 border-b border-border flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+          className="p-6 border-b border-border flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shrink-0">
-            <Trophy className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <img src="/logo.png" alt="Trainylics" className="h-14 w-14 object-contain rounded-2xl shadow-xs shrink-0" />
           <div>
-            <h1 className="text-xl font-bold text-foreground tracking-tight">trainylics</h1>
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Scouting & Tactics</span>
+            <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">trainylics</h1>
+            <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-extrabold mt-1.5 block">Scouting & Tactics</span>
           </div>
         </div>
 
@@ -118,15 +118,6 @@ export default function Layout() {
             Notas de Scouting
           </Button>
 
-          <Button 
-            variant={isActive('/profile') ? "secondary" : "ghost"} 
-            className="w-full justify-start gap-3 h-10 text-sm font-semibold"
-            onClick={() => navigate('/profile')}
-          >
-            <User className="h-4 w-4" />
-            Mi Perfil
-          </Button>
-
           {/* Admin specific routes */}
           {user?.roles?.includes('admin') && (
             <div className="pt-4 mt-4 border-t border-border space-y-1">
@@ -149,26 +140,49 @@ export default function Layout() {
               </Button>
             </div>
           )}
-        </nav>
 
-        {/* User Info & Logout (Desktop Bottom) */}
-        <div className="p-4 border-t border-border flex flex-col gap-3 bg-secondary/10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <User className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <div className="truncate flex-1">
-              <p className="text-xs font-bold text-foreground truncate">{user?.username}</p>
-              <Badge variant="outline" className="text-[9px] uppercase font-bold py-0 h-4 border-primary/20 text-primary">
-                {user?.roles?.[0] || 'Entrenador'}
-              </Badge>
-            </div>
+          {/* Theme Toggle (Desktop) */}
+          <div className="pt-4 mt-4 border-t border-border space-y-1">
+            <span className="px-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Tema</span>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 h-10 text-sm font-semibold text-muted-foreground hover:text-foreground"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="h-4 w-4 text-amber-500" />
+                  <span>Modo Claro</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="h-4 w-4 text-indigo-400" />
+                  <span>Modo Oscuro</span>
+                </>
+              )}
+            </Button>
           </div>
-          <Button variant="destructive" size="sm" onClick={handleLogout} className="w-full gap-2 h-9">
-            <LogOut className="h-4 w-4" />
-            Cerrar Sesión
-          </Button>
-        </div>
+
+          {/* User profile (moved below Admin Control) */}
+          <div className="pt-4 mt-4 border-t border-border space-y-1">
+            <Button 
+              variant={isActive('/profile') ? "secondary" : "ghost"} 
+              className="w-full justify-start gap-3 h-10 text-sm font-semibold"
+              onClick={() => navigate('/profile')}
+            >
+              <User className="h-4 w-4" />
+              Mi Perfil
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 h-10 text-sm font-semibold text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar Sesión
+            </Button>
+          </div>
+        </nav>
       </aside>
 
       {/* Main content body */}
@@ -177,12 +191,10 @@ export default function Layout() {
         <header className="xl:hidden border-b border-border bg-card p-4 flex items-center justify-between shrink-0">
           <div 
             onClick={() => navigate('/home')}
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3.5 cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Trophy className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">trainylics</h1>
+            <img src="/logo.png" alt="Trainylics" className="h-11 w-11 object-contain rounded-xl shadow-xs shrink-0" />
+            <h1 className="text-xl font-black text-foreground tracking-tight">trainylics</h1>
           </div>
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -198,14 +210,12 @@ export default function Layout() {
                   navigate('/home')
                   setMobileMenuOpen(false)
                 }}
-                className="p-6 border-b border-border flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                className="p-6 border-b border-border flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shrink-0">
-                  <Trophy className="h-6 w-6 text-primary-foreground" />
-                </div>
+                <img src="/logo.png" alt="Trainylics" className="h-14 w-14 object-contain rounded-2xl shadow-xs shrink-0" />
                 <div>
-                  <h1 className="text-xl font-bold text-foreground tracking-tight">trainylics</h1>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Scouting & Tactics</span>
+                  <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">trainylics</h1>
+                  <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-extrabold mt-1.5 block">Scouting & Tactics</span>
                 </div>
               </div>
 
@@ -259,18 +269,6 @@ export default function Layout() {
                   Notas de Scouting
                 </Button>
 
-                <Button 
-                  variant={isActive('/profile') ? "secondary" : "ghost"} 
-                  className="w-full justify-start gap-4 py-6 text-base font-semibold"
-                  onClick={() => {
-                    navigate('/profile')
-                    setMobileMenuOpen(false)
-                  }}
-                >
-                  <User className="h-5 w-5 text-primary" />
-                  Mi Perfil
-                </Button>
-
                 {user?.roles?.includes('admin') && (
                   <>
                     <div className="pt-4 pb-2 px-4">
@@ -301,26 +299,57 @@ export default function Layout() {
                     </Button>
                   </>
                 )}
-              </nav>
 
-              {/* Bottom User Info & Logout inside Sheet */}
-              <div className="p-4 border-t border-border flex flex-col gap-3 bg-secondary/10 mt-auto">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
-                    <User className="h-5 w-5 text-primary-foreground" />
-                  </div>
-                  <div className="truncate flex-1">
-                    <p className="text-sm font-bold text-foreground truncate">{user?.username}</p>
-                    <Badge variant="outline" className="text-[9px] uppercase font-bold py-0 h-4 border-primary/20 text-primary">
-                      {user?.roles?.[0] || 'Entrenador'}
-                    </Badge>
-                  </div>
+                {/* Theme Toggle (Mobile) */}
+                <div className="pt-4 mt-2 border-t border-border space-y-2">
+                  <span className="px-4 text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Tema</span>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-4 py-6 text-base font-semibold text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      setTheme(theme === 'dark' ? 'light' : 'dark')
+                    }}
+                  >
+                    {theme === 'dark' ? (
+                      <>
+                        <Sun className="h-5 w-5 text-amber-500" />
+                        <span>Modo Claro</span>
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="h-5 w-5 text-indigo-400" />
+                        <span>Modo Oscuro</span>
+                      </>
+                    )}
+                  </Button>
                 </div>
-                <Button variant="destructive" size="default" onClick={handleLogout} className="w-full gap-2 py-5 text-sm font-bold mt-2">
-                  <LogOut className="h-5 w-5" />
-                  Cerrar Sesión
-                </Button>
-              </div>
+
+                {/* User profile (moved below Admin Control) */}
+                <div className="pt-4 mt-2 border-t border-border space-y-2">
+                  <Button 
+                    variant={isActive('/profile') ? "secondary" : "ghost"} 
+                    className="w-full justify-start gap-4 py-6 text-base font-semibold"
+                    onClick={() => {
+                      navigate('/profile')
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    <User className="h-5 w-5 text-primary" />
+                    Mi Perfil
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start gap-4 py-6 text-base font-semibold text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      handleLogout()
+                      setMobileMenuOpen(false)
+                    }}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Cerrar Sesión
+                  </Button>
+                </div>
+              </nav>
             </SheetContent>
           </Sheet>
         </header>
