@@ -31,6 +31,30 @@ coverage.xml
 # Local Env Files
 .env
 .env.*
+backend/.env
+frontend/.env
 
 # Vite Junk
 vite.config.ts.timestamp*
+
+# IDE / Editor Settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Databases and Dumps
+db_dump.txt
+*.sql
+*.sqlite
+
+# Temp Logs, Scrapes, & Caches
+sofascore_*.json
+sofascore_tables_structure.txt
+group_sync_status.txt
+*.log
+backend/cache/
+backend/media/
