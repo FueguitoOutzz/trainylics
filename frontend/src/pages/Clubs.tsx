@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import api, { getMe } from '../services/api'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts"
 
 interface Team {
   id: string
@@ -25,6 +27,7 @@ interface Player {
   name: string
   position: string | null
   team_id: string
+  stats?: Record<string, number>
 }
 
 interface TeamStats {
@@ -99,6 +102,7 @@ export default function ClubsPage() {
   const [newNoteRating, setNewNoteRating] = useState("3")
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("team") // "team" or playerId
   const [submittingNote, setSubmittingNote] = useState(false)
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null)
 
   // Authenticate user
   useEffect(() => {
@@ -130,6 +134,30 @@ export default function ClubsPage() {
     }
     loadLeagues()
   }, [])
+
+  // Utility helpers to determine league coverage
+  const isResultsOnlyLeague = (leagueName: string, season: string) => {
+    const name = leagueName.toLowerCase();
+    if (name.includes("ascenso") && (season === "2022" || season === "2023")) return true;
+    if (name.includes("segunda") && (season === "2024" || season === "2025")) return true;
+    if (name.includes("tercera división a") && (season === "2024" || season === "2026")) return true;
+    if (name.includes("tercera división b")) return true;
+    return false;
+  };
+
+  const isPartialStatsLeague = (leagueName: string, season: string) => {
+    const name = leagueName.toLowerCase();
+    if (name.includes("primera") && season === "2022") return true;
+    if (name.includes("segunda") && season === "2026") return true;
+    if (name.includes("tercera división a") && season === "2025") return true;
+    return false;
+  };
+
+  const currentCoverage = isResultsOnlyLeague(selectedLiga, selectedYear)
+    ? "results_only"
+    : isPartialStatsLeague(selectedLiga, selectedYear)
+    ? "partial"
+    : "complete";
 
   // Filter values
   const availableLigas = Array.from(new Set(leagues.map(l => l.name))).sort()
@@ -285,33 +313,68 @@ export default function ClubsPage() {
             <p className="text-muted-foreground">Explora y analiza la plantilla, estadísticas e historial de los equipos.</p>
           </div>
 
-          {/* Filters */}
-          <div className="flex items-center gap-3">
-            {availableLigas.length > 0 && (
-              <Select value={selectedLiga} onValueChange={setSelectedLiga}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Liga" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableLigas.map((name) => (
-                    <SelectItem key={name} value={name}>{name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+          {/* Filters & Simbología */}
+          <div className="flex flex-col items-end gap-3 shrink-0">
+            <div className="flex items-center gap-3">
+              {currentCoverage === "results_only" && (
+                <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/15 text-[10px] font-bold">
+                  ⚠️ Solo Resultados
+                </Badge>
+              )}
+              {currentCoverage === "partial" && (
+                <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/15 text-[10px] font-bold">
+                  ⚠️ Estadísticas Parciales
+                </Badge>
+              )}
+              {currentCoverage === "complete" && (
+                <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/15 text-[10px] font-bold">
+                  📊 Cobertura Completa
+                </Badge>
+              )}
 
-            {availableYears.length > 0 && (
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-[110px]">
-                  <SelectValue placeholder="Año" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableYears.map((year) => (
-                    <SelectItem key={year} value={year}>{year}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+              {availableLigas.length > 0 && (
+                <Select value={selectedLiga} onValueChange={setSelectedLiga}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Liga" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableLigas.map((name) => (
+                      <SelectItem key={name} value={name}>{name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {availableYears.length > 0 && (
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-[110px]">
+                    <SelectValue placeholder="Año" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            {/* Simbología Leyenda */}
+            <div className="flex items-center gap-3 text-[10px] bg-secondary/10 px-2.5 py-1 rounded-lg border border-border/30">
+              <span className="text-muted-foreground font-semibold">Leyenda Cobertura:</span>
+              <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Completa
+              </span>
+              <span className="flex items-center gap-1 text-amber-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                Parcial
+              </span>
+              <span className="flex items-center gap-1 text-blue-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                Solo Resultados
+              </span>
+            </div>
           </div>
         </div>
 
@@ -437,7 +500,8 @@ export default function ClubsPage() {
                               {list.map((player) => (
                                 <div 
                                   key={player.id} 
-                                  className="p-2 border rounded-lg bg-card/50 flex items-center gap-2 hover:bg-card hover:border-primary/20 transition-colors"
+                                  className="p-2 border rounded-lg bg-card/50 flex items-center gap-2 hover:bg-card hover:border-primary/40 transition-colors cursor-pointer hover:shadow-sm"
+                                  onClick={() => setSelectedPlayer(player)}
                                 >
                                   <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center shrink-0">
                                     <User className="h-3.5 w-3.5 text-muted-foreground" />
@@ -503,84 +567,96 @@ export default function ClubsPage() {
                         </div>
                       </div>
 
-                      {/* Performance Bar Chart (Custom Clean CSS Indicators) */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground border-b pb-1">
-                          Métricas Promedio por Partido
-                        </h4>
+                      {/* Performance Bar Chart or Warning */}
+                      {isResultsOnlyLeague(selectedLiga, selectedYear) ? (
+                        <div className="bg-blue-500/5 border border-blue-500/25 p-4 rounded-xl space-y-2 mt-2">
+                          <p className="text-sm font-bold text-blue-400 flex items-center gap-1.5">
+                            ⚠️ Cobertura de Solo Resultados
+                          </p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Esta liga y temporada cuentan únicamente con el registro de resultados y marcadores finales.
+                            Las estadísticas avanzadas de juego (posesión, tiros totales, tiros a puerta, tiros de esquina y xG) no están disponibles para esta categoría en Sofascore.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground border-b pb-1">
+                            Métricas Promedio por Partido {isPartialStatsLeague(selectedLiga, selectedYear) && "(Parcial)"}
+                          </h4>
 
-                        <div className="space-y-3">
-                          {/* Possession */}
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs font-semibold">
-                              <span>Posesión del Balón</span>
-                              <span className="text-primary">{teamStats.avg_possession}%</span>
+                          <div className="space-y-3">
+                            {/* Possession */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold">
+                                <span>Posesión del Balón</span>
+                                <span className="text-primary">{teamStats.avg_possession}%</span>
+                              </div>
+                              <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="bg-primary h-full rounded-full transition-all duration-500" 
+                                  style={{ width: `${teamStats.avg_possession}%` }}
+                                />
+                              </div>
                             </div>
-                            <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-primary h-full rounded-full transition-all duration-500" 
-                                style={{ width: `${teamStats.avg_possession}%` }}
-                              />
-                            </div>
-                          </div>
 
-                          {/* Shots */}
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs font-semibold">
-                              <span>Tiros Totales</span>
-                              <span className="text-primary">{teamStats.avg_shots} tiros</span>
+                            {/* Shots */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold">
+                                <span>Tiros Totales</span>
+                                <span className="text-primary">{teamStats.avg_shots} tiros</span>
+                              </div>
+                              <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="bg-indigo-500 h-full rounded-full transition-all duration-500" 
+                                  style={{ width: `${Math.min((teamStats.avg_shots / 20) * 100, 100)}%` }}
+                                />
+                              </div>
                             </div>
-                            <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-indigo-500 h-full rounded-full transition-all duration-500" 
-                                style={{ width: `${Math.min((teamStats.avg_shots / 20) * 100, 100)}%` }}
-                              />
-                            </div>
-                          </div>
 
-                          {/* Shots on Target */}
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs font-semibold">
-                              <span>Tiros a Puerta</span>
-                              <span className="text-primary">{teamStats.avg_shots_on_target} tiros</span>
+                            {/* Shots on Target */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold">
+                                <span>Tiros a Puerta</span>
+                                <span className="text-primary">{teamStats.avg_shots_on_target} tiros</span>
+                              </div>
+                              <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+                                  style={{ width: `${Math.min((teamStats.avg_shots_on_target / 8) * 100, 100)}%` }}
+                                />
+                              </div>
                             </div>
-                            <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                                style={{ width: `${Math.min((teamStats.avg_shots_on_target / 8) * 100, 100)}%` }}
-                              />
-                            </div>
-                          </div>
 
-                          {/* Corners */}
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs font-semibold">
-                              <span>Tiros de Esquina</span>
-                              <span className="text-primary">{teamStats.avg_corners} corners</span>
+                            {/* Corners */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold">
+                                <span>Tiros de Esquina</span>
+                                <span className="text-primary">{teamStats.avg_corners} corners</span>
+                              </div>
+                              <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="bg-amber-500 h-full rounded-full transition-all duration-500" 
+                                  style={{ width: `${Math.min((teamStats.avg_corners / 10) * 100, 100)}%` }}
+                                />
+                              </div>
                             </div>
-                            <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-amber-500 h-full rounded-full transition-all duration-500" 
-                                style={{ width: `${Math.min((teamStats.avg_corners / 10) * 100, 100)}%` }}
-                              />
-                            </div>
-                          </div>
 
-                          {/* Expected Goals xG */}
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs font-semibold">
-                              <span>Goles Esperados (xG)</span>
-                              <span className="text-primary">{teamStats.avg_xg} xG</span>
-                            </div>
-                            <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
-                              <div 
-                                className="bg-rose-500 h-full rounded-full transition-all duration-500" 
-                                style={{ width: `${Math.min((teamStats.avg_xg / 3) * 100, 100)}%` }}
-                              />
+                            {/* Expected Goals xG */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold">
+                                <span>Goles Esperados (xG)</span>
+                                <span className="text-primary">{teamStats.avg_xg} xG</span>
+                              </div>
+                              <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
+                                <div 
+                                  className="bg-rose-500 h-full rounded-full transition-all duration-500" 
+                                  style={{ width: `${Math.min((teamStats.avg_xg / 3) * 100, 100)}%` }}
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </TabsContent>
@@ -728,6 +804,68 @@ export default function ClubsPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Dialog para Radar Chart de Rendimiento del Jugador */}
+      <Dialog open={selectedPlayer !== null} onOpenChange={(open) => { if (!open) setSelectedPlayer(null); }}>
+        <DialogContent className="sm:max-w-[425px] bg-[#0c101a]/95 backdrop-blur-md border border-slate-800 text-slate-100 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-white">
+              <Sparkles className="h-5 w-5 text-blue-500 animate-pulse" />
+              Perfil de Rendimiento
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Atributos técnicos individuales de {selectedPlayer?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPlayer && (
+            <div className="flex flex-col items-center justify-center py-2 space-y-6">
+              {/* Position Badge & Name */}
+              <div className="w-full flex items-center justify-between px-1">
+                <span className="text-sm font-semibold text-slate-300">{selectedPlayer.name}</span>
+                <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/15">
+                  {selectedPlayer.position || "Sin posición"}
+                </Badge>
+              </div>
+
+              {/* Radar Chart Container */}
+              <div className="w-full bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 flex items-center justify-center min-h-[260px]">
+                <ResponsiveContainer width="100%" height={250}>
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={
+                    selectedPlayer.stats 
+                      ? Object.entries(selectedPlayer.stats).map(([key, val]) => ({
+                          subject: key,
+                          value: val,
+                        }))
+                      : []
+                  }>
+                    <PolarGrid stroke="#1e293b" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#475569', fontSize: 9 }} />
+                    <Radar
+                      name={selectedPlayer.name}
+                      dataKey="value"
+                      stroke="#3b82f6"
+                      fill="#2563eb"
+                      fillOpacity={0.25}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Attributes Score Grid */}
+              <div className="w-full grid grid-cols-3 gap-2">
+                {selectedPlayer.stats && Object.entries(selectedPlayer.stats).map(([attr, score]) => (
+                  <div key={attr} className="bg-slate-950/40 p-2.5 rounded-lg border border-slate-800/80 flex flex-col items-center gap-0.5 hover:bg-slate-900/40 transition-colors">
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider text-center">{attr}</span>
+                    <span className="text-sm font-extrabold text-white">{score}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

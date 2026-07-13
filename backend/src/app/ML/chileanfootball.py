@@ -14,6 +14,7 @@ class ChileanLeaguePredictor:
             'corners_home', 'corners_away'
         ]
         self.accuracy = 0.0
+        self.metrics_report = {}
 
     def prepare_data(self, match_data_list, training=False):
         """
@@ -71,6 +72,7 @@ class ChileanLeaguePredictor:
                 print("Dataset demasiado pequeño para la división, entrenando en todo el conjunto de datos.")
                 self.model.fit(X, y)
                 self.accuracy = 1.0 # Puntuación perfecta arbitraria ya que no podemos probar
+                self.metrics_report = {}
                 return
 
             # Verificar si podemos estratificar
@@ -84,6 +86,10 @@ class ChileanLeaguePredictor:
             
             predictions = self.model.predict(X_test)
             self.accuracy = accuracy_score(y_test, predictions)
+            
+            from sklearn.metrics import classification_report
+            self.metrics_report = classification_report(y_test, predictions, output_dict=True, zero_division=0)
+            
             print(f"Model trained. Accuracy: {self.accuracy:.2f}")
             
         except Exception as e:
@@ -94,9 +100,20 @@ class ChileanLeaguePredictor:
             try:
                 self.model.fit(X, y)
                 self.accuracy = 0.0
+                self.metrics_report = {}
                 print("Fallback training successful.")
             except Exception as e2:
                 print(f"Fallback training failed: {e2}")
+
+    def get_feature_importances(self):
+        if self.model is None or not hasattr(self.model, "feature_importances_"):
+            # Uniform fallback
+            val = 1.0 / len(self.features)
+            return {f: val for f in self.features}
+        return dict(zip(self.features, self.model.feature_importances_.tolist()))
+
+    def get_metrics_report(self):
+        return self.metrics_report or {}
 
     def predict(self, match_data):
         """

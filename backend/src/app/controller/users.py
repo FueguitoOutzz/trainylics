@@ -27,3 +27,27 @@ async def update_user_profile_controller(request_data: __import__('app').schema.
     if not success:
         return ResponseSchema(detail="No se pudo actualizar el perfil.")
     return ResponseSchema(detail="Perfil actualizado exitosamente.")
+
+from typing import Optional
+from pydantic import BaseModel
+
+class TeamUpdateRequest(BaseModel):
+    team_id: Optional[str] = None
+
+@router.put("/me/team", response_model=ResponseSchema)
+async def update_user_team_controller(request_data: TeamUpdateRequest, token: str = Depends(JWTbearer())):
+    payload = JWTRepo.extract_token(token)
+    if not payload:
+        return ResponseSchema(detail="Token inválido.", result=None)
+    user_id = payload.get("user_id")
+    
+    from app.config import db
+    from app.model.user import User
+    from sqlalchemy import update
+    
+    stmt = update(User).where(User.id == user_id).values(team_id=request_data.team_id)
+    async with db.session as session:
+        await session.execute(stmt)
+        await session.commit()
+        
+    return ResponseSchema(detail="Equipo actualizado exitosamente.")

@@ -83,6 +83,7 @@ class CreateUserRequest(BaseModel):
     name: str
     password: str
     role_name: str
+    team_id: Optional[str] = None
 
 class UpdateProfileRequest(BaseModel):
     phone_number: str

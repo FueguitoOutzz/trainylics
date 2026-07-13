@@ -43,6 +43,57 @@ async def sync_roster(request: SyncRosterRequest, _=Depends(RoleChecker(["admin"
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/check-matches")
+async def check_matches():
+    from sqlmodel import select
+    from app.config import db
+    from app.model.match import Match
+    from app.model.team import Team
+    
+    try:
+        async with db.session_factory() as session:
+            unplayed_stmt = select(Match).where(Match.home_goals.is_(None), Match.away_goals.is_(None))
+            unplayed_res = await session.execute(unplayed_stmt)
+            unplayed_matches = unplayed_res.scalars().all()
+            
+            deleted_details = []
+            for um in unplayed_matches:
+                played_stmt = select(Match).where(
+                    Match.league_id == um.league_id,
+                    Match.round == um.round,
+                    (
+                        ((Match.home_team_id == um.home_team_id) & (Match.away_team_id == um.away_team_id)) |
+                        ((Match.home_team_id == um.away_team_id) & (Match.away_team_id == um.home_team_id))
+                    ),
+                    Match.home_goals.is_not(None),
+                    Match.away_goals.is_not(None)
+                )
+                p_res = await session.execute(played_stmt)
+                played_match = p_res.scalars().first()
+                
+                if played_match:
+                    await session.delete(um)
+                    deleted_details.append({
+                        "id": um.id,
+                        "round": um.round,
+                        "date": um.date.isoformat() if um.date else None,
+                        "league_id": um.league_id,
+                        "replaced_by": played_match.id
+                    })
+            
+            if deleted_details:
+                await session.commit()
+                
+            return {
+                "status": "success",
+                "deleted_count": len(deleted_details),
+                "deleted_matches": deleted_details
+            }
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "traceback": traceback.format_exc()}
+
+
 @router.post("/sync-teams-info", response_model=ResponseSchema)
 async def sync_teams_info(_=Depends(RoleChecker(["admin"]))):
     """

@@ -1,0 +1,218 @@
+=== REPORTE DE CALIDAD DE DATOS Y ESTADÍSTICAS ===
+Total ligas analizadas: 19
+Total equipos analizados: 337
+
+--- ESTADO DE LIGAS (Partidos con estadísticas vs Solo resultado) ---
+Liga: Liga de Ascenso (2025) | ID: 0b69c4c7-b9dc-4580-95ba-f07f0ad1893d
+  - Partidos Jugados en BD: 240/241
+  - Partidos con Estadísticas: 237 (98.8%)
+  - Partidos con xG: 236 (98.3%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Ascenso (2022) | ID: 41061bb3-3b28-459f-a1cc-7f65dc9f3e16
+  - Partidos Jugados en BD: 272/283
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Primera (2026) | ID: 7cf6b610-f419-426b-a56e-16d680a9cd0c
+  - Partidos Jugados en BD: 120/243
+  - Partidos con Estadísticas: 120 (100.0%)
+  - Partidos con xG: 117 (97.5%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Primera (2025) | ID: 8a1bcb77-89f2-4884-ab20-750da17f48ac
+  - Partidos Jugados en BD: 232/238
+  - Partidos con Estadísticas: 232 (100.0%)
+  - Partidos con xG: 228 (98.3%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Ascenso (2026) | ID: a12fa352-3a85-42ad-a7f5-2194c3f0cf66
+  - Partidos Jugados en BD: 120/241
+  - Partidos con Estadísticas: 117 (97.5%)
+  - Partidos con xG: 117 (97.5%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Ascenso (2024) | ID: b8f40800-8e29-4a45-adb2-250e3f3c63bf
+  - Partidos Jugados en BD: 240/250
+  - Partidos con Estadísticas: 233 (97.1%)
+  - Partidos con xG: 233 (97.1%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Primera (2022) | ID: bad4091f-ff55-4dca-87d7-8f9af542a08c
+  - Partidos Jugados en BD: 240/244
+  - Partidos con Estadísticas: 237 (98.8%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Primera (2024) | ID: dc45aff8-66e3-4b37-9033-a60a4e1aa369
+  - Partidos Jugados en BD: 240/252
+  - Partidos con Estadísticas: 238 (99.2%)
+  - Partidos con xG: 235 (97.9%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Primera (2023) | ID: f0a51327-f9c0-4535-baec-ffb6121254f2
+  - Partidos Jugados en BD: 232/251
+  - Partidos con Estadísticas: 231 (99.6%)
+  - Partidos con xG: 231 (99.6%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Ascenso (2023) | ID: f6251388-49fe-4d9b-ac52-4568555abae7
+  - Partidos Jugados en BD: 240/253
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Segunda (2024) | ID: bb974fd5-17ea-4621-b834-ec34e0774f27
+  - Partidos Jugados en BD: 182/183
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Segunda (2025) | ID: 884ee666-7781-4c84-bf2c-f59acddfe0a2
+  - Partidos Jugados en BD: 156/186
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Liga de Segunda (2026) | ID: fc0e3b1d-f299-4e53-b966-80cadddf2ad3
+  - Partidos Jugados en BD: 84/87
+  - Partidos con Estadísticas: 27 (32.1%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 25 partidos
+Liga: Tercera División A (2024) | ID: 981e4649-e149-435f-bd34-a512ea5a2c11
+  - Partidos Jugados en BD: 182/201
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Tercera División A (2025) | ID: 7410b97f-a517-4315-9030-06a7386f22f6
+  - Partidos Jugados en BD: 195/195
+  - Partidos con Estadísticas: 137 (70.3%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 115 partidos
+Liga: Tercera División A (2026) | ID: 3cbbb85e-290e-44a2-8f2d-af18e357fb2e
+  - Partidos Jugados en BD: 98/98
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Tercera División B (2024) | ID: 5889cbb3-275f-40c1-a838-e39459daf58a
+  - Partidos Jugados en BD: 366/418
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Tercera División B (2025) | ID: 5c19def0-a500-40e3-8fe5-667d18e14dcb
+  - Partidos Jugados en BD: 338/340
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+Liga: Tercera División B (2026) | ID: 4ac2cff6-e011-4271-83aa-9c13f2cc279b
+  - Partidos Jugados en BD: 196/200
+  - Partidos con Estadísticas: 0 (0.0%)
+  - Partidos con xG: 0 (0.0%)
+  - Desfase Tiros (Totales=0, A Puerta > 0): 0 partidos
+
+--- EQUIPOS CON DISCREPANCIAS DE TIROS (Promedio Tiros Totales < Promedio Tiros a Puerta) ---
+Equipo: Deportes Quillón (ID: 52c3064c-fb32-47b5-8263-0f1d0fed5b9d)
+  - Partidos jugados: 27
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.07
+  - Promedio xG: 0.0
+Equipo: CD Municipal Mejillones (ID: 4131c408-55e2-45e4-9fae-465553d0f7f8)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.73
+  - Promedio xG: 0.0
+Equipo: Chimbarongo FC (ID: d499efb4-1321-4803-9021-f09d2d17029c)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.42
+  - Promedio xG: 0.0
+Equipo: Quintero Unido FC (ID: 5ce669c3-74cd-49b3-9c87-f76a0ef7486a)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 2.65
+  - Promedio xG: 0.0
+Equipo: Lautaro de Bui­n (ID: d09696e8-d406-4732-9adf-42b5ca0be0b1)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.46
+  - Promedio xG: 0.0
+Equipo: CSDC Malleco Unido (ID: 1a3b61e0-f6cd-45a6-9675-b73aa8841589)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.88
+  - Promedio xG: 0.0
+Equipo: Lota Schwager (ID: b53be645-c0e3-4fce-9b1a-c83f0908ba4c)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.42
+  - Promedio xG: 0.0
+Equipo: Municipal Puente Alto (ID: f6405a51-8a7e-4e19-a2d5-a40e885d1b3d)
+  - Partidos jugados: 25
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.8
+  - Promedio xG: 0.0
+Equipo: CDSC Aguará (ID: 62a65792-6520-44d7-82dc-8d995f4032bc)
+  - Partidos jugados: 24
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.33
+  - Promedio xG: 0.0
+Equipo: CDS Naval de Talcahuano (ID: 167a60fa-7259-45ee-a2c5-4180bda299de)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.62
+  - Promedio xG: 0.0
+Equipo: Constitución Unido (ID: 21690bad-9dc9-4492-99b2-9f5761e8caf7)
+  - Partidos jugados: 25
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 2.76
+  - Promedio xG: 0.0
+Equipo: CD Imperial Unido (ID: b16e1205-b07b-4191-b64a-693adabd060d)
+  - Partidos jugados: 28
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 2.61
+  - Promedio xG: 0.0
+Equipo: CD Colchagua (ID: ba2c1631-f7fa-4de1-b557-a19249a33cd8)
+  - Partidos jugados: 27
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 2.89
+  - Promedio xG: 0.0
+Equipo: Comunal Cabrero (ID: 0e5d636e-1eed-483d-99be-89ab29274f10)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 3.62
+  - Promedio xG: 0.0
+Equipo: Atlético Colina (ID: 4d637440-f6ec-4904-a517-bbefcfcc5354)
+  - Partidos jugados: 26
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 4.88
+  - Promedio xG: 0.0
+Equipo: Brujas de Salamanca (ID: 7be00eb9-8502-4ab4-8e9f-1ea197ec0ce4)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 0.83
+  - Promedio xG: 0.0
+Equipo: CD Concón National (ID: 4f9e6bc5-f35c-4ee3-a449-a38392228bf7)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 0.83
+  - Promedio xG: 0.0
+Equipo: CD Trasandino de Los Andes (ID: 2ded2c92-6e5c-43b6-be9c-03730da3cce6)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 0.33
+  - Promedio xG: 0.0
+Equipo: Provincial Ovalle (ID: 696db824-4380-4552-8a20-9144c81a41eb)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.42
+  - Promedio xG: 0.0
+Equipo: Santiago City FC (ID: 1254cecf-bf9a-47f7-b4f0-2ad3f562a0be)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.17
+  - Promedio xG: 0.0
+Equipo: Provincial Osorno (ID: af78b85c-9c23-4558-a180-8ac9cd527ed9)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 0.5
+  - Promedio xG: 0.0
+Equipo: Deportes Linares (ID: 0ae03f99-3ff2-47c2-a4d2-05edc578d919)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.67
+  - Promedio xG: 0.0
+Equipo: CD Colchagua (ID: 5b8b5ad7-b150-40c1-bb68-9d47d91a72ff)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.67
+  - Promedio xG: 0.0
+Equipo: Real San Joaquín (ID: 55a498bc-8c7b-4a41-b1ee-351926bd2163)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.0
+  - Promedio xG: 0.0
+Equipo: Atlético Colina (ID: 60e50164-77c9-46f3-bbe1-132892e7b72e)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 0.5
+  - Promedio xG: 0.0
+Equipo: Deportes Rengo (ID: 3ae40e34-e3e2-4d9c-94a8-cb002bc11ad7)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 0.58
+  - Promedio xG: 0.0
+Equipo: Santiago Morning (ID: 3bd89465-c580-4bdc-bb9e-df933f5c76ec)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.67
+  - Promedio xG: 0.0
+Equipo: Lota Schwager (ID: 430546d1-1bac-4091-b672-6b49e3999734)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.58
+  - Promedio xG: 0.0
+Equipo: General Velasquez (ID: c8b17d10-7b7f-4ab3-9041-354239e0a3c8)
+  - Partidos jugados: 12
+  - Promedio Tiros Totales: 0.0 | Promedio Tiros a Puerta: 1.17
+  - Promedio xG: 0.0

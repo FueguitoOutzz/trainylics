@@ -1,0 +1,21 @@
+=== REPORTE DE EXTRACCIÓN Y SINCRONIZACIÓN [DB CLEANUP ACTIVE] ===
+
+Liga: Liga de Ascenso | Temporada: 2025 | Equipos: 16 | Partidos: 240
+Liga: Liga de Ascenso | Temporada: 2022 | Equipos: 17 | Partidos: 272
+Liga: Liga de Primera | Temporada: 2026 | Equipos: 16 | Partidos: 242
+Liga: Liga de Primera | Temporada: 2025 | Equipos: 16 | Partidos: 232
+Liga: Liga de Ascenso | Temporada: 2026 | Equipos: 16 | Partidos: 240
+Liga: Liga de Ascenso | Temporada: 2024 | Equipos: 16 | Partidos: 240
+Liga: Liga de Primera | Temporada: 2022 | Equipos: 16 | Partidos: 240
+Liga: Liga de Primera | Temporada: 2024 | Equipos: 16 | Partidos: 240
+Liga: Liga de Primera | Temporada: 2023 | Equipos: 16 | Partidos: 232
+Liga: Liga de Ascenso | Temporada: 2023 | Equipos: 16 | Partidos: 240
+Liga: Liga de Segunda | Temporada: 2024 | Equipos: 14 | Partidos: 182
+Liga: Liga de Segunda | Temporada: 2025 | Equipos: 14 | Partidos: 182
+Liga: Liga de Segunda | Temporada: 2026 | Equipos: 14 | Partidos: 84
+Liga: Tercera División A | Temporada: 2024 | Equipos: 14 | Partidos: 182
+Liga: Tercera División A | Temporada: 2025 | Equipos: 15 | Partidos: 195
+Liga: Tercera División A | Temporada: 2026 | Equipos: 14 | Partidos: 98
+Liga: Tercera División B | Temporada: 2024 | Equipos: 36 | Partidos: 366
+Liga: Tercera División B | Temporada: 2025 | Equipos: 27 | Partidos: 338
+Liga: Tercera División B | Temporada: 2026 | Equipos: 28 | Partidos: 196

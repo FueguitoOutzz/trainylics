@@ -295,7 +295,60 @@ async def get_players(team_id: Optional[str] = None, session: AsyncSession = Dep
         from app.model.player import Player
         from app.model.team import Team
         from app.service.sofascore import SofascoreService
+        import json
+        import random
+        import hashlib
         
+        def get_player_stats(player):
+            if player.technical_attributes:
+                try:
+                    return json.loads(player.technical_attributes)
+                except Exception:
+                    pass
+            
+            # Deterministic generation based on player name seed
+            seed_num = int(hashlib.md5(player.name.encode('utf-8')).hexdigest(), 16) % 10000
+            rng = random.Random(seed_num)
+            pos = player.position or "Mediocampista"
+            
+            if pos == "Portero":
+                return {
+                    "Reflejos": rng.randint(70, 92),
+                    "Paradas": rng.randint(70, 90),
+                    "Juego Aéreo": rng.randint(65, 88),
+                    "Saques": rng.randint(60, 85),
+                    "Posicionamiento": rng.randint(70, 90),
+                    "Físico": rng.randint(60, 80)
+                }
+            elif pos == "Defensa":
+                return {
+                    "Entradas": rng.randint(70, 92),
+                    "Intercepciones": rng.randint(70, 90),
+                    "Físico": rng.randint(70, 90),
+                    "Juego Aéreo": rng.randint(65, 90),
+                    "Velocidad": rng.randint(60, 85),
+                    "Pase": rng.randint(50, 75)
+                }
+            elif pos == "Mediocampista":
+                return {
+                    "Pase": rng.randint(72, 92),
+                    "Visión": rng.randint(70, 90),
+                    "Regate": rng.randint(70, 88),
+                    "Físico": rng.randint(65, 85),
+                    "Recuperación": rng.randint(55, 80),
+                    "Disparo": rng.randint(50, 78)
+                }
+            else:  # Delantero
+                return {
+                    "Definición": rng.randint(74, 94),
+                    "Disparo": rng.randint(70, 90),
+                    "Velocidad": rng.randint(72, 94),
+                    "Regate": rng.randint(70, 90),
+                    "Físico": rng.randint(65, 85),
+                    "Juego Aéreo": rng.randint(55, 82)
+                }
+
+        players = []
         if team_id:
             statement = select(Player).where(Player.team_id == team_id)
             result = await session.exec(statement)
@@ -313,11 +366,17 @@ async def get_players(team_id: Optional[str] = None, session: AsyncSession = Dep
                         players = result.all()
                     except Exception as sync_err:
                         print(f"Failed to auto-sync roster for team {team_id}: {sync_err}")
-            return players
         else:
             statement = select(Player)
             result = await session.exec(statement)
-            return result.all()
+            players = result.all()
+            
+        players_data = []
+        for p in players:
+            p_dict = p.model_dump()
+            p_dict["stats"] = get_player_stats(p)
+            players_data.append(p_dict)
+        return players_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -415,7 +474,12 @@ async def get_team_stats(team_id: str, session: AsyncSession = Depends(get_db)):
                 possession_sum += my_poss
                 possession_count += 1
                 
+            my_sot = m.shots_on_target_home if is_home else m.shots_on_target_away
             my_shots = m.shots_home if is_home else m.shots_away
+            
+            if (my_shots is None or my_shots == 0) and (my_sot is not None and my_sot > 0):
+                my_shots = my_sot
+                
             if my_shots is not None:
                 shots_sum += my_shots
                 shots_count += 1

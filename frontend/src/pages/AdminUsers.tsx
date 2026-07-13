@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { Trash2, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { getUsers, deleteUser, promoteUser, getMe, createUser } from '../services/api'
+import { getUsers, deleteUser, promoteUser, getMe, createUser, getTeams } from '../services/api'
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
@@ -46,7 +46,18 @@ export default function AdminUsers() {
   const [newName, setNewName] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newRole, setNewRole] = useState('entrenador')
+  const [newTeamId, setNewTeamId] = useState('')
+  const [teams, setTeams] = useState<any[]>([])
   const [creating, setCreating] = useState(false)
+
+  const generateRandomPassword = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%"
+    let pass = ""
+    for (let i = 0; i < 12; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    setNewPassword(pass)
+  }
 
   const checkAuth = async () => {
     try {
@@ -76,8 +87,18 @@ export default function AdminUsers() {
     }
   }
 
+  const loadTeams = async () => {
+    try {
+      const data = await getTeams()
+      setTeams(data || [])
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   useEffect(() => {
     checkAuth()
+    loadTeams()
   }, [])
 
   const handleDelete = async (id: string, username: string) => {
@@ -132,14 +153,37 @@ export default function AdminUsers() {
         email: newEmail,
         name: newName,
         password: newPassword,
-        role_name: newRole
+        role_name: newRole,
+        team_id: (newTeamId && newTeamId !== 'none_team') ? newTeamId : null
       })
-      toast.success("Usuario creado exitosamente")
+      
+      const selectedTeamName = teams.find(t => t.id === newTeamId)?.name || 'Ninguno'
+
+      Swal.fire({
+        title: '¡Usuario Creado!',
+        html: `
+          <div style="text-align: left; font-family: sans-serif; padding: 10px 0;">
+            <p>El usuario ha sido registrado exitosamente con las siguientes credenciales:</p>
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+              <p style="margin: 4px 0;"><strong>Usuario:</strong> <span style="font-family: monospace;">${newUsername}</span></p>
+              <p style="margin: 4px 0;"><strong>Contraseña:</strong> <span style="font-family: monospace; color: #10b981; font-weight: bold; font-size: 1.1em;">${newPassword}</span></p>
+              <p style="margin: 4px 0;"><strong>Rol:</strong> ${newRole}</p>
+              <p style="margin: 4px 0;"><strong>Equipo Asociado:</strong> ${selectedTeamName}</p>
+            </div>
+            <p style="font-size: 0.85em; color: #888; margin-top: 10px;">Asegúrate de copiar y guardar esta contraseña antes de cerrar este mensaje.</p>
+          </div>
+        `,
+        icon: 'success',
+        confirmButtonColor: '#3b82f6',
+        confirmButtonText: 'Entendido'
+      })
+
       setCreateOpen(false)
       setNewUsername('')
       setNewEmail('')
       setNewName('')
       setNewPassword('')
+      setNewTeamId('')
       loadUsers()
     } catch (err: any) {
       toast.error(err?.response?.data?.detail || "Error al crear usuario")
@@ -184,7 +228,10 @@ export default function AdminUsers() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="password">Contraseña Provisional</Label>
-                      <Input id="password" required value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                      <div className="flex gap-2">
+                        <Input id="password" required value={newPassword} onChange={e => setNewPassword(e.target.value)} className="flex-1" />
+                        <Button type="button" variant="outline" onClick={generateRandomPassword}>Generar</Button>
+                      </div>
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="role">Rol</Label>
@@ -196,6 +243,20 @@ export default function AdminUsers() {
                           <SelectItem value="entrenador">Entrenador</SelectItem>
                           <SelectItem value="scouter">Scouter</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="team">Asociar Equipo (Opcional)</Label>
+                      <Select value={newTeamId} onValueChange={setNewTeamId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Ninguno" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none_team">Ninguno</SelectItem>
+                          {teams.map((t) => (
+                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

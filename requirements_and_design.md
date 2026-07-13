@@ -10,7 +10,7 @@ Al analizar el esquema físico actual de la base de datos PostgreSQL, determinam
 
 | Módulo Propuesto | ¿Datos Presentes en DB? | Detalle / Viabilidad |
 | :--- | :---: | :--- |
-| **Tabla de Posiciones Dinámica** | **SÍ** | Totalmente viable. Contamos con las columnas `home_team_id`, `away_team_id`, `home_goals` y `away_goals` en la tabla `match` para calcular puntos, partidos ganados/empatados/perdidos y diferencia de goles al vuelo. |
+| **Tabla de Posiciones Dinámica** | **SÍ** | Totalmente viable. Contamos con las columnas `home_team_id`, `away_team_id`, `home_goals` y `away_goals` en la tabla `match` para calcular puntos, partidos ganados/empatados/perdidos y diferencia de goles al vuelo. Soporta tanto ligas de grupo único como ligas agrupadas en múltiples zonas (Norte, Sur, Centro) mediante la columna `group_name` de los clubes. |
 | **Predicciones 2026 (Futuros)** | **SÍ** | Totalmente viable. Ya existen los partidos correspondientes a 2026 cargados con goles en `NULL`. La API y el servicio de Machine Learning (`ml_service.py`) pueden procesar y predecir los resultados de estos partidos usando el historial previo (2022-2025). |
 | **Clubes y Plantillas por Año** | **SÍ** | Viable. Las tablas `team` y `player` están vinculadas. `player` cuenta con la columna `position` para su ubicación táctica y `technical_attributes` (formato JSON) donde se pueden almacenar métricas individuales. |
 | **Pizarra Táctica ("Cancha")** | **SÍ** | Viable. Los jugadores están asociados a sus equipos correspondientes, permitiendo listarlos por demarcación (`position`) en la pizarra del entrenador y persistir las formaciones en la nueva tabla `tactic`. |
@@ -34,6 +34,8 @@ Al analizar el esquema físico actual de la base de datos PostgreSQL, determinam
 *   **RF-11 (Persistencia de Tácticas):** El sistema debe permitir crear, actualizar (guardar cambios) y eliminar esquemas tácticos directamente desde la interfaz, persistiendo el título, descripción, formación y las posiciones en formato JSON.
 *   **RF-12 (Módulo de Scouting de Notas):** El sistema debe contar con un módulo de scouting independiente accesible desde la barra de navegación para la gestión dedicada de notas de jugadores y equipos.
 *   **RF-13 (Caché y Proxy de Escudos):** El backend debe exponer un endpoint proxy de descarga y caché de escudos que evite el hotlinking directo a dominios externos protegidos por Cloudflare (403 Forbidden/CORS).
+*   **RF-14 (Clasificación por Grupos):** El sistema debe admitir ligas divididas en subgrupos/zonas geográficas, calculando las posiciones independientemente para cada grupo y renderizándolas en tablas visuales separadas.
+*   **RF-15 (Dashboard de Métricas del Predictor):** El sistema debe mostrar un panel con la importancia relativa de cada estadística de entrada para el modelo de ML (Feature Importance) y el detalle de F1-Score para los resultados posibles (Local, Empate, Visita).
 
 
 ### Requerimientos No Funcionales (RNF)
@@ -149,6 +151,7 @@ A continuación se detallan las tablas creadas en la base de datos PostgreSQL:
     *   `name` `VARCHAR`
     *   `stadium` `VARCHAR`
     *   `sofascore_id` `INTEGER`
+    *   `group_name` `VARCHAR` (Nullable - para zonas como Norte, Sur o Centro)
     *   `league_id` `VARCHAR(36)` **[FK -> league.id]**
     *   `created_at` `TIMESTAMP`, `modified_at` `TIMESTAMP`
 

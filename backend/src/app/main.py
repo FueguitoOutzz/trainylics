@@ -22,6 +22,7 @@ from app.controller import authentication, users, admin, prediction, matches, no
 
 
 def init_app():
+    # Force full uvicorn reload trigger
     db.init()
     
     app = FastAPI(title = "Trainylics API", description = "Paginación de datos para análisis de entrenamiento", version="1.0.0")
@@ -64,6 +65,7 @@ def init_app():
                 await session.execute(text("ALTER TABLE note ADD COLUMN IF NOT EXISTS player_id VARCHAR"))
                 await session.execute(text("ALTER TABLE match ALTER COLUMN home_goals DROP NOT NULL"))
                 await session.execute(text("ALTER TABLE match ALTER COLUMN away_goals DROP NOT NULL"))
+                await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS team_id VARCHAR"))
                 await session.commit()
             except Exception as e:
                 print(f"Migration error: {e}")
@@ -168,6 +170,19 @@ def init_app():
                 await asyncio.sleep(5)  # Wait for startup to settle
                 async with db.session_factory() as session:
                     try:
+                        # Rename any existing "Tercera División" leagues to "Tercera División A"
+                        res_rename = await session.execute(
+                            select(League).where(League.name == "Tercera División")
+                        )
+                        leagues_to_rename = res_rename.scalars().all()
+                        for l in leagues_to_rename:
+                            l.name = "Tercera División A"
+                            session.add(l)
+                        if leagues_to_rename:
+                            await session.commit()
+                            print(f"Renamed {len(leagues_to_rename)} leagues to 'Tercera División A' in DB", flush=True)
+
+                        # Run group sync for Liga de Segunda 2026 if it already exists
                         res = await session.execute(
                             select(League).where(League.name == "Liga de Segunda", League.season == "2026")
                         )
@@ -176,8 +191,98 @@ def init_app():
                             print("Running startup group sync for Liga de Segunda 2026...", flush=True)
                             await SofascoreService.sync_team_groups(18834, 86895, league.id)
                             print("Startup group sync completed for Liga de Segunda 2026.", flush=True)
+                        
+                        # Clean up duplicate postponed/rescheduled matches on startup
+                        print("Running database-wide duplicate postponed match cleanup...", flush=True)
+                        from app.model.match import Match
+                        res_all_m = await session.execute(select(Match))
+                        all_matches = res_all_m.scalars().all()
+                        groups = {}
+                        for m in all_matches:
+                            teams_key = tuple(sorted([str(m.home_team_id), str(m.away_team_id)]))
+                            key = (m.league_id, m.round, teams_key)
+                            if key not in groups:
+                                groups[key] = []
+                            groups[key].append(m)
+                        deleted_count = 0
+                        for key, match_list in groups.items():
+                            if len(match_list) > 1:
+                                played = [m for m in match_list if m.home_goals is not None and m.away_goals is not None]
+                                unplayed = [m for m in match_list if m.home_goals is None or m.away_goals is None]
+                                if played and unplayed:
+                                    for m in unplayed:
+                                        await session.delete(m)
+                                        deleted_count += 1
+                        if deleted_count > 0:
+                            await session.commit()
+                            print(f"Cleanup: Deleted {deleted_count} duplicate unplayed postponed matches.", flush=True)
+                        else:
+                            print("Cleanup: No duplicate unplayed postponed matches found.", flush=True)
                     except Exception as ex:
-                        print(f"Error during startup group sync: {ex}", flush=True)
+                        print(f"Error during startup rename/group sync/cleanup: {ex}", flush=True)
+
+                    # Run background sync for all tournament data (Segunda, Tercera A, Tercera B 2024-2026)
+                    try:
+                        print("Starting background sync for new tournaments (Segunda, Tercera A, Tercera B)...", flush=True)
+                        asyncio.create_task(SofascoreService.sync_new_tournaments_task())
+                    except Exception as ex:
+                        print(f"Error during background new tournament sync: {ex}", flush=True)
+
+                    # Train the ML model on startup with existing data
+                    async def train_model_on_startup():
+                        await asyncio.sleep(8) # Let the app settle and run renaming first
+                        print("Running startup training for ML model...", flush=True)
+                        async with db.session_factory() as session:
+                            try:
+                                from app.model.match import Match
+                                from app.service.ml_service import predictor
+                                statement = select(Match).where(Match.home_goals != None, Match.away_goals != None)
+                                result = await session.execute(statement)
+                                matches = result.scalars().all()
+                                if matches:
+                                    matches_data = [m.model_dump() for m in matches]
+                                    predictor.train(matches_data)
+                                    print(f"Startup ML training completed. Accuracy: {predictor.accuracy:.2f}", flush=True)
+                                else:
+                                    print("No played matches found in DB for startup ML training.", flush=True)
+                            except Exception as ex:
+                                print(f"Error during startup ML training: {ex}", flush=True)
+                    asyncio.create_task(train_model_on_startup())
+
+                    # Periodically write progress report to a text file
+                    async def check_database_progress():
+                        while True:
+                            await asyncio.sleep(5)
+                            async with db.session_factory() as session:
+                                try:
+                                    from app.model.league import League
+                                    from app.model.team import Team
+                                    from app.model.match import Match
+                                    from sqlalchemy import func, select
+                                    
+                                    res = await session.execute(select(League))
+                                    leagues = res.scalars().all()
+                                    
+                                    lines = ["=== REPORTE DE EXTRACCIÓN Y SINCRONIZACIÓN [DB CLEANUP ACTIVE] ===", ""]
+                                    for l in leagues:
+                                        t_res = await session.execute(
+                                            select(func.count(Team.id)).where(Team.league_id == l.id)
+                                        )
+                                        t_count = t_res.scalar()
+                                        
+                                        m_res = await session.execute(
+                                            select(func.count(Match.id)).where(Match.league_id == l.id)
+                                        )
+                                        m_count = m_res.scalar()
+                                        
+                                        lines.append(f"Liga: {l.name} | Temporada: {l.season} | Equipos: {t_count} | Partidos: {m_count}")
+                                    
+                                    with open(r"c:\Users\renat\OneDrive\Desktop\trainylics\sync_check_report.txt", "w", encoding="utf-8") as f:
+                                        f.write("\n".join(lines))
+                                except Exception as err:
+                                    print(f"Error checking progress: {err}", flush=True)
+
+                    asyncio.create_task(check_database_progress())
                         
             asyncio.create_task(run_sync_and_verify())
         except Exception as e:
@@ -223,4 +328,5 @@ def start():
     """
     Inicia la aplicación FastAPI utilizando Uvicorn.
     """
+    # Force reload trigger comments
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

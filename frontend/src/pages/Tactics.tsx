@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import api from '../services/api'
 
@@ -127,6 +128,8 @@ export default function Tactics() {
   const [selectedTeamId, setSelectedTeamId] = useState<string>("none")
   const [selectedFormation, setSelectedFormation] = useState<string>("4-3-3")
   const [players, setPlayers] = useState<Player[]>([])
+  const [nextMatchAnalysis, setNextMatchAnalysis] = useState<any>(null)
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false)
 
   // Tactical circles configuration
   const [nodes, setNodes] = useState<TacticNode[]>([])
@@ -191,6 +194,26 @@ export default function Tactics() {
       }
     }
     loadPlayers()
+  }, [selectedTeamId])
+
+  // Fetch next match AI analysis when base team is selected
+  useEffect(() => {
+    if (!selectedTeamId || selectedTeamId === "none") {
+      setNextMatchAnalysis(null)
+      return
+    }
+    const loadNextMatchAnalysis = async () => {
+      setLoadingAnalysis(true)
+      try {
+        const res = await api.get(`/predict/next-match/${selectedTeamId}`)
+        setNextMatchAnalysis(res.data)
+      } catch (err) {
+        console.error("Failed to load next match analysis", err)
+      } finally {
+        setLoadingAnalysis(false)
+      }
+    }
+    loadNextMatchAnalysis()
   }, [selectedTeamId])
 
   // Handle Saved Tactic Selection
@@ -390,91 +413,192 @@ export default function Tactics() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-3 items-start">
-        {/* Left Control Panel Form */}
-        <Card className="xl:col-span-1 border-border/60 bg-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg flex items-center gap-1.5">
-              <Users className="h-5 w-5 text-primary" /> Configuración de Pizarra
-            </CardTitle>
-            <CardDescription>Completa los detalles de tu plan táctico</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Title */}
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground block">Título del Esquema</label>
-              <Input 
-                placeholder="Ej. Presión Alta vs Colo-Colo" 
-                value={tacticTitle}
-                onChange={e => setTacticTitle(e.target.value)}
-              />
-            </div>
-
-            {/* Formation & Team Selection */}
-            <div className="grid grid-cols-2 gap-3">
+        {/* Column 1: Config & AI Analysis */}
+        <div className="xl:col-span-1 space-y-6">
+          {/* Left Control Panel Form */}
+          <Card className="border-border/60 bg-card">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg flex items-center gap-1.5">
+                <Users className="h-5 w-5 text-primary" /> Configuración de Pizarra
+              </CardTitle>
+              <CardDescription>Completa los detalles de tu plan táctico</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Title */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground block">Formación Base</label>
-                <Select value={selectedFormation} onValueChange={setSelectedFormation}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(FORMATIONS).map(f => (
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-[10px] uppercase font-bold text-muted-foreground block">Título del Esquema</label>
+                <Input 
+                  placeholder="Ej. Presión Alta vs Colo-Colo" 
+                  value={tacticTitle}
+                  onChange={e => setTacticTitle(e.target.value)}
+                />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground block">Equipo Base</label>
-                <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Elegir Equipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">-- Sin Plantilla --</SelectItem>
-                    {teams.map(t => (
-                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Formation & Team Selection */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-muted-foreground block">Formación Base</label>
+                  <Select value={selectedFormation} onValueChange={setSelectedFormation}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(FORMATIONS).map(f => (
+                        <SelectItem key={f} value={f}>{f}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-muted-foreground block">Equipo Base</label>
+                  <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Elegir Equipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">-- Sin Plantilla --</SelectItem>
+                      {teams.map(t => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
 
-            {/* Descriptions & Strategy Notes */}
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground block">Instrucciones y Estrategia</label>
-              <Textarea 
-                placeholder="Escribe directrices, transiciones, comportamientos tras pérdida, etc..." 
-                className="h-28 text-xs resize-none"
-                value={tacticDescription}
-                onChange={e => setTacticDescription(e.target.value)}
-              />
-            </div>
+              {/* Descriptions & Strategy Notes */}
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-muted-foreground block">Instrucciones y Estrategia</label>
+                <Textarea 
+                  placeholder="Escribe directrices, transiciones, comportamientos tras pérdida, etc..." 
+                  className="h-28 text-xs resize-none"
+                  value={tacticDescription}
+                  onChange={e => setTacticDescription(e.target.value)}
+                />
+              </div>
 
-            {/* Submit Actions */}
-            <div className="pt-2 flex flex-col gap-2">
-              <Button onClick={handleSaveTactic} className="w-full gap-2 font-semibold">
-                <Save className="h-4 w-4" />
-                {selectedTacticId === "new" ? "Guardar Nueva Táctica" : "Guardar Cambios"}
-              </Button>
-              
-              {selectedTacticId !== "new" && (
-                <Button variant="destructive" onClick={handleDeleteTactic} className="w-full gap-2 font-semibold bg-red-600/95 hover:bg-red-700">
-                  <Trash2 className="h-4 w-4" />
-                  Eliminar Táctica
+              {/* Submit Actions */}
+              <div className="pt-2 flex flex-col gap-2">
+                <Button onClick={handleSaveTactic} className="w-full gap-2 font-semibold">
+                  <Save className="h-4 w-4" />
+                  {selectedTacticId === "new" ? "Guardar Nueva Táctica" : "Guardar Cambios"}
                 </Button>
-              )}
+                
+                {selectedTacticId !== "new" && (
+                  <Button variant="destructive" onClick={handleDeleteTactic} className="w-full gap-2 font-semibold bg-red-600/95 hover:bg-red-700">
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar Táctica
+                  </Button>
+                )}
 
-              {selectedTacticId !== "new" && (
-                <Button variant="secondary" onClick={() => handleSelectTactic("new")} className="w-full gap-2 font-semibold">
-                  <Plus className="h-4 w-4" />
-                  Nueva Pizarra de Cero
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {selectedTacticId !== "new" && (
+                  <Button variant="secondary" onClick={() => handleSelectTactic("new")} className="w-full gap-2 font-semibold">
+                    <Plus className="h-4 w-4" />
+                    Nueva Pizarra de Cero
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 2: AI Predicted Rival Details */}
+          {selectedTeamId && selectedTeamId !== "none" && (
+            <Card className="border-border/60 bg-card overflow-hidden">
+              <CardHeader className="pb-3 border-b bg-primary/5">
+                <CardTitle className="text-md flex items-center gap-1.5 text-foreground">
+                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                  Rival y Recomendación IA
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Análisis táctico automatizado para el siguiente partido
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 space-y-4">
+                {loadingAnalysis ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+                    <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+                    <span className="text-xs">Analizando rival...</span>
+                  </div>
+                ) : !nextMatchAnalysis || !nextMatchAnalysis.opponent ? (
+                  <div className="text-center py-6 text-muted-foreground text-xs">
+                    No se encontró programación de próximos partidos para este equipo.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Rival Header */}
+                    <div className="flex items-center justify-between bg-secondary/20 p-3 rounded-lg border border-border/40">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Próximo Rival</span>
+                        <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                          <Shield className="h-4 w-4 text-primary shrink-0" />
+                          {nextMatchAnalysis.opponent.name}
+                        </h4>
+                        {nextMatchAnalysis.opponent.stadium && (
+                          <p className="text-[10px] text-muted-foreground">{nextMatchAnalysis.opponent.stadium}</p>
+                        )}
+                      </div>
+                      
+                      {nextMatchAnalysis.prediction && (
+                        <div className="text-right">
+                          <span className="text-[9px] uppercase font-bold text-muted-foreground block">Predicción IA</span>
+                          <Badge className={`${
+                            nextMatchAnalysis.prediction.result === 'Victoria' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' :
+                            nextMatchAnalysis.prediction.result === 'Derrota' ? 'bg-red-500/10 text-red-400 border-red-500/25' :
+                            'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                          } border text-[10px] font-bold`}>
+                            {nextMatchAnalysis.prediction.result} ({nextMatchAnalysis.prediction.confidence}%)
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* AI Recommended Formation */}
+                    <div className="space-y-2 p-3 border rounded-lg bg-blue-500/5 border-blue-500/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-blue-400 flex items-center gap-1">
+                          ⚽ Formación IA: {nextMatchAnalysis.recommended_formation?.name || "4-3-3"}
+                        </span>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-6 text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 hover:text-blue-300"
+                          onClick={() => {
+                            const rawForm = nextMatchAnalysis.recommended_formation?.name || "4-3-3";
+                            const match = rawForm.match(/\d-\d-\d/);
+                            if (match) {
+                              setSelectedFormation(match[0]);
+                              toast.success(`Formación establecida en ${match[0]}`);
+                            }
+                          }}
+                        >
+                          Aplicar Formación
+                        </Button>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {nextMatchAnalysis.recommended_formation?.justification}
+                      </p>
+                    </div>
+
+                    {/* Tactical Tips list */}
+                    <div className="space-y-2">
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground block">Claves del Partido (IA Tips)</span>
+                      <ul className="space-y-1.5">
+                        {nextMatchAnalysis.tactical_tips && nextMatchAnalysis.tactical_tips.map((tip: string, idx: number) => (
+                          <li key={idx} className="text-xs text-muted-foreground flex gap-2 items-start leading-relaxed">
+                            <span className="text-primary shrink-0 pt-0.5">🔹</span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Right main canvas soccer field */}
         <Card className="xl:col-span-2 border-border/60 bg-card overflow-hidden">

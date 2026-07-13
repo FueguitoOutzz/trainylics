@@ -57,7 +57,8 @@ async def get_me(token: str = Depends(JWTbearer())):
         "id": user.id,
         "username": user.username,
         "email": user.email,
-        "roles": roles
+        "roles": roles,
+        "team_id": user.team_id
     }
     
     return ResponseSchema(detail="Información de usuario", result=user_data)

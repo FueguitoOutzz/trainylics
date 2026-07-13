@@ -324,6 +324,26 @@ class SofascoreService:
                     )
                     session.add(new_match)
                     synced_matches.append({"id": match_id, "home": home_name, "away": away_name, "status": "created"})
+            # Clean up duplicate postponed/rescheduled matches for this league and round
+            stmt_dup = select(Match).where(Match.league_id == league_id, Match.round == round_num)
+            res_dup = await session.execute(stmt_dup)
+            matches_dup = res_dup.scalars().all()
+            
+            pairs = {}
+            for m in matches_dup:
+                key = tuple(sorted([str(m.home_team_id), str(m.away_team_id)]))
+                if key not in pairs:
+                    pairs[key] = []
+                pairs[key].append(m)
+                
+            for key, match_list in pairs.items():
+                if len(match_list) > 1:
+                    played = [m for m in match_list if m.home_goals is not None and m.away_goals is not None]
+                    unplayed = [m for m in match_list if m.home_goals is None or m.away_goals is None]
+                    if played and unplayed:
+                        for m in unplayed:
+                            logger.info(f"Deleting duplicate unplayed postponed match ID {m.id} in sync_round")
+                            await session.delete(m)
 
             await session.commit()
         return synced_matches
@@ -514,9 +534,6 @@ class SofascoreService:
         try:
             r = requests.get(url, headers=headers, impersonate="chrome", timeout=10)
             if r.status_code == 200:
-                seasons = r.json().get("seasons", [])
-                for s in seasons:
-                    if str(s.get("year")) == str(season_year):
                         return s.get("id")
         except Exception as e:
             logger.error(f"Error fetching season ID for tournament {tournament_id}, year {season_year}: {e}")
@@ -527,17 +544,19 @@ class SofascoreService:
         tournament_id = None
         if "primera" in league_name.lower():
             tournament_id = 11653
-        elif "ascenso" in league_name.lower() or "b" in league_name.lower():
-            tournament_id = 1240
+        elif "tercera división b" in league_name.lower() or "tercera b" in league_name.lower():
+            tournament_id = 22105
+        elif "tercera división a" in league_name.lower() or "tercera a" in league_name.lower() or "tercera división" in league_name.lower():
+            tournament_id = 22063
         elif "segunda" in league_name.lower():
             tournament_id = 18834
-        elif "tercera" in league_name.lower():
-            tournament_id = 22063
+        elif "ascenso" in league_name.lower() or "b" in league_name.lower():
+            tournament_id = 1240
             
         if not tournament_id:
             return None, None
 
-        # Hardcoded mappings provided by the user for Segunda and Tercera A
+        # Hardcoded mappings provided by the user for Segunda, Tercera A, and Tercera B
         mappings = {
             18834: {
                 "2024": 58333,
@@ -548,6 +567,11 @@ class SofascoreService:
                 "2024": 58763,
                 "2025": 70755,
                 "2026": 91199
+            },
+            22105: {
+                "2024": 59021,
+                "2025": 73302,
+                "2026": 91232
             }
         }
 
@@ -570,12 +594,10 @@ class SofascoreService:
                 tournament_id, season_id = await cls.get_sofascore_ids(league.name, league.season)
                 if not tournament_id or not season_id:
                     logger.warning(f"Could not resolve Sofascore IDs for league '{league.name}' ({league.season})")
-                    continue
-                
-                # 2. Find the match in this league closest to the current date
+                                   # 2. Find the match in this league closest to the current date
                 now = datetime.now()
                 matches_res = await session.execute(
-                    select(Match.round, Match.date).where(Match.league_id == league.id)
+                    select(Match.round, Match.date, Match.home_goals, Match.away_goals).where(Match.league_id == league.id)
                 )
                 matches = matches_res.all()
                 if not matches:
@@ -592,16 +614,29 @@ class SofascoreService:
                         for m in matches
                     )
                     
-                    if not has_today_matches:
-                        logger.info(f"No matches scheduled around today (+/- 12h) for league '{league.name}' ({league.season}). Skipping sync to avoid API saturation.")
+                    # Also check for any past unplayed matches to catch postponed/rescheduled matches
+                    past_unplayed_rounds = list(set([
+                        m.round for m in matches
+                        if m.date < now and (m.home_goals is None or m.away_goals is None)
+                    ]))
+                    
+                    if not has_today_matches and not past_unplayed_rounds:
+                        logger.info(f"No matches scheduled around today (+/- 12h) and no past unplayed matches for league '{league.name}' ({league.season}). Skipping sync to avoid API saturation.")
                         continue
-
-                    # Find match with minimum date difference
-                    closest_match = min(matches, key=lambda m: abs((m.date - now).total_seconds()))
-                    current_round = closest_match.round
-                    # Sync previous, current, and next round
-                    rounds_to_sync = list(set([max(1, current_round - 1), current_round, min(30, current_round + 1)]))
-                    logger.info(f"League '{league.name}' ({league.season}): closest round is {current_round}. Syncing rounds: {rounds_to_sync}")
+                    
+                    rounds_to_sync = []
+                    if has_today_matches:
+                        # Find match with minimum date difference
+                        closest_match = min(matches, key=lambda m: abs((m.date - now).total_seconds()))
+                        current_round = closest_match.round
+                        # Sync previous, current, and next round
+                        rounds_to_sync.extend([max(1, current_round - 1), current_round, min(30, current_round + 1)])
+                    
+                    # Always include rounds of past unplayed matches to resolve postponed/rescheduled fixtures
+                    rounds_to_sync.extend(past_unplayed_rounds)
+                    rounds_to_sync = list(set(rounds_to_sync))
+                    
+                    logger.info(f"League '{league.name}' ({league.season}): syncing rounds: {rounds_to_sync}")
                 
                 for r in rounds_to_sync:
                     try:
@@ -624,7 +659,7 @@ class SofascoreService:
 
     @classmethod
     async def sync_new_tournaments_task(cls):
-        logger.info("Starting background sync for Segunda Division and Tercera Division A (2024-2026)...")
+        logger.info("Starting background sync for Segunda Division, Tercera Division A, and Tercera Division B (2024-2026)...")
         # Hardcoded mappings provided by the user for fast and 100% reliable import
         mappings = {
             18834: {
@@ -636,11 +671,17 @@ class SofascoreService:
                 "2024": 58763,
                 "2025": 70755,
                 "2026": 91199
+            },
+            22105: {
+                "2024": 59021,
+                "2025": 73302,
+                "2026": 91232
             }
         }
         tournaments = [
             {"id": 18834, "name": "Liga de Segunda"},
-            {"id": 22063, "name": "Tercera División A"}
+            {"id": 22063, "name": "Tercera División A"},
+            {"id": 22105, "name": "Tercera División B"}
         ]
         years = ["2024", "2025", "2026"]
         
@@ -664,6 +705,20 @@ class SofascoreService:
                             await session.refresh(league)
                         
                         league_id = league.id
+                        
+                        # Optimization: if it is a completed season (2024, 2025) and matches already exist, skip API requests to avoid rate limits
+                        from sqlalchemy import func
+                        from app.model.match import Match
+                        
+                        match_count_res = await session.execute(
+                            select(func.count(Match.id)).where(Match.league_id == league_id)
+                        )
+                        match_count = match_count_res.scalar() or 0
+                        
+                        if year in ["2024", "2025"] and match_count > 0:
+                            logger.info(f"Skipping background API requests for completed league {t_name} ({year}) - {match_count} matches already synced.")
+                            continue
+
                         logger.info(f"Syncing league: {t_name} ({year}) with season ID {season_id}...")
                         
                         # 3. Sync all rounds 1 to 30
@@ -709,6 +764,8 @@ class SofascoreService:
                             group_name = "Zona Norte"
                         elif "zona sur" in name.lower() or "grupo sur" in name.lower() or "south" in name.lower():
                             group_name = "Zona Sur"
+                        elif "zona centro" in name.lower() or "grupo centro" in name.lower() or "center" in name.lower():
+                            group_name = "Zona Centro"
                         elif len(standings) > 1:
                             group_name = name
                         

@@ -54,6 +54,16 @@ export const updateProfile = async (data: { phone_number: string; birth: string;
   return response.data
 }
 
+export const updateUserTeam = async (teamId: string | null) => {
+  const response = await api.put('/users/me/team', { team_id: teamId })
+  return response.data
+}
+
+export const getNextMatchAnalysis = async (teamId: string) => {
+  const response = await api.get(`/predict/next-match/${teamId}`)
+  return response.data
+}
+
 export const getLeagues = async () => {
   const response = await api.get('/matches/leagues')
   return response.data

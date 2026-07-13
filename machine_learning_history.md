@@ -79,3 +79,29 @@ El modelo actual se entrena utilizando las siguientes características de rendim
 | **Entrenamiento** | Local en Jupyter Notebook | Automatizado vía endpoint `/predict/train` |
 | **Actualización** | Lenta (semanal o mensual) | Cada 12 horas (programado) o instantánea |
 | **Interactividad** | Inexistente (datos estáticos) | Dinámica en la interfaz de usuario |
+
+---
+
+## 4. Visualización de Métricas de Precisión e Importancia de Variables (Feature Importance)
+
+Para dar mayor rigurosidad académica y soporte empírico en la tesis, se implementó un panel visual completo de rendimiento del modelo de Machine Learning dentro de la interfaz de **Resultados e IA**.
+
+```
++-------------------------------------------------------------------+
+|                   MÉTRICAS DEL PREDICTOR IA                       |
+|                                                                   |
+|  [ Variables Clave ]               [ Precisión por Clase ]        |
+|  - xG Local: 11.2%  [====      ]    - Local (0):   65% F1-Score   |
+|  - xG Visita: 10.9% [====      ]    - Empate (1):  16% F1-Score   |
+|  - Córners: 10.4%   [===       ]    - Visita (2):  34% F1-Score   |
++-------------------------------------------------------------------+
+```
+
+### Detalles de la Implementación:
+1. **Validación Cruzada Integrada:** Durante el entrenamiento (`predictor.train()`), los datos se dividen (80% entrenamiento / 20% pruebas) con estratificación de clases. Se calcula el reporte de clasificación completo (`classification_report` de Scikit-Learn).
+2. **Exposición en la API (`/predict/stats`):** El backend retorna:
+   * `played_count`: El total de partidos reales en base de datos sobre los cuales se entrena el bosque aleatorio.
+   * `feature_importances`: El peso matemático asignado a cada una de las 10 estadísticas de entrada (`self.model.feature_importances_`).
+   * `metrics`: El reporte de métricas detallado por clase (Local, Empate, Visita), incluyendo el F1-Score.
+3. **Entrenamiento en Startup:** Se configuró una rutina en el inicio del backend (`main.py`) que pre-entrena el modelo al arrancar el servidor FastAPI. Esto garantiza que las métricas visuales del dashboard se muestren de forma inmediata y actualizada al usuario desde el primer segundo.
+4. **Widget del Frontend (`Home.tsx`):** Un panel lateral renderiza barras de porcentaje dinámicas de la importancia de cada característica física/técnica del partido y desglosa la precisión (F1-score) por tipo de resultado. Esto permite al usuario y scouter entender *qué estadísticas influyen más* para que el modelo IA asigne una probabilidad de victoria.

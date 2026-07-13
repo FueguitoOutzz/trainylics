@@ -20,3 +20,5 @@ class User(SQLModel, TimeMixin, table=True):
 
     roles: List["Role"] = Relationship(back_populates="users", link_model=UserRole)
     notes: List["Note"] = Relationship(back_populates="user")
+
+    team_id: Optional[str] = Field(default=None, sa_column=Column("team_id", String, nullable=True))

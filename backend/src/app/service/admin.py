@@ -46,7 +46,8 @@ class AdminService:
                         username=request.username,
                         email=request.email,
                         password=pwd_context.hash(request.password),
-                        person_id=_person_id)
+                        person_id=_person_id,
+                        team_id=request.team_id)
             
             _role = await RoleRepo.find_by_role_name(request.role_name)
             if not _role:
