@@ -534,7 +534,13 @@ class SofascoreService:
         try:
             r = requests.get(url, headers=headers, impersonate="chrome", timeout=10)
             if r.status_code == 200:
+                seasons = r.json().get("seasons", [])
+                for s in seasons:
+                    if s.get("year") == season_year or season_year in s.get("name", ""):
                         return s.get("id")
+                if seasons:
+                    # Fallback to latest season if exact year not found
+                    return seasons[0].get("id")
         except Exception as e:
             logger.error(f"Error fetching season ID for tournament {tournament_id}, year {season_year}: {e}")
         return None
@@ -659,39 +665,25 @@ class SofascoreService:
 
     @classmethod
     async def sync_new_tournaments_task(cls):
-        logger.info("Starting background sync for Segunda Division, Tercera Division A, and Tercera Division B (2024-2026)...")
-        # Hardcoded mappings provided by the user for fast and 100% reliable import
-        mappings = {
-            18834: {
-                "2024": 58333,
-                "2025": 68205,
-                "2026": 86895
-            },
-            22063: {
-                "2024": 58763,
-                "2025": 70755,
-                "2026": 91199
-            },
-            22105: {
-                "2024": 59021,
-                "2025": 73302,
-                "2026": 91232
-            }
-        }
+        logger.info("Starting background sync for Primera, Ascenso, Segunda, Tercera A, and Tercera B (2024-2026)...")
         tournaments = [
-            {"id": 18834, "name": "Liga de Segunda"},
-            {"id": 22063, "name": "Tercera División A"},
-            {"id": 22105, "name": "Tercera División B"}
+            {"name": "Liga de Primera"},
+            {"name": "Liga de Ascenso"},
+            {"name": "Liga de Segunda"},
+            {"name": "Tercera División A"},
+            {"name": "Tercera División B"}
         ]
         years = ["2024", "2025", "2026"]
         
         async with db.session_factory() as session:
             for t in tournaments:
-                t_id = t["id"]
                 t_name = t["name"]
                 for year in years:
                     try:
-                        season_id = mappings[t_id][year]
+                        t_id, season_id = await cls.get_sofascore_ids(t_name, year)
+                        if not t_id or not season_id:
+                            logger.warning(f"Could not resolve Sofascore IDs for {t_name} ({year})")
+                            continue
                         
                         # 2. Get or create League in database
                         league_res = await session.execute(
@@ -722,6 +714,7 @@ class SofascoreService:
                         logger.info(f"Syncing league: {t_name} ({year}) with season ID {season_id}...")
                         
                         # 3. Sync all rounds 1 to 30
+                        consecutive_empty = 0
                         for r in range(1, 31):
                             try:
                                 results = await cls.sync_round(
@@ -731,13 +724,22 @@ class SofascoreService:
                                     league_id=league_id
                                 )
                                 if not results:
-                                    logger.info(f"  Round {r}: no matches returned. Stopping round sync for this season.")
+                                    logger.info(f"  Round {r}: no matches returned.")
+                                    consecutive_empty += 1
+                                else:
+                                    logger.info(f"  Round {r}: synced {len(results)} matches.")
+                                    consecutive_empty = 0
+                                
+                                if consecutive_empty >= 3:
+                                    logger.info(f"Stopping round sync for this season after {consecutive_empty} consecutive empty rounds.")
                                     break
-                                logger.info(f"  Round {r}: synced {len(results)} matches.")
                                 await asyncio.sleep(0.5)
                             except Exception as e:
                                 logger.warning(f"  Round {r} ended or failed: {e}")
-                                break
+                                consecutive_empty += 1
+                                if consecutive_empty >= 3:
+                                    logger.info(f"Stopping round sync for this season after {consecutive_empty} consecutive failures/empty rounds.")
+                                    break
                         
                         # Sync team group divisions
                         await cls.sync_team_groups(tournament_id=t_id, season_id=season_id, league_id=league_id)
@@ -787,3 +789,20 @@ class SofascoreService:
                 logger.warning(f"Standings API returned {r.status_code} for tournament {tournament_id}, season {season_id}")
         except Exception as e:
             logger.error(f"Error syncing team groups: {e}")
+
+    @classmethod
+    async def fetch_match_lineup(cls, match_id: int) -> dict:
+        url = f"https://www.sofascore.com/api/v1/event/{match_id}/lineups"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        try:
+            logger.info(f"Fetching lineups for match {match_id}")
+            r = requests.get(url, headers=headers, impersonate="chrome", timeout=10)
+            if r.status_code == 200:
+                return r.json()
+            else:
+                logger.warning(f"Lineups API returned status {r.status_code} for match {match_id}")
+        except Exception as e:
+            logger.error(f"Error fetching lineups for match {match_id}: {e}")
+        return {}

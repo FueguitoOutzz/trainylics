@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Trash2, Star, PlusCircle, Search, Filter, MessageSquare } from "lucide-react"
+import { Trash2, Star, PlusCircle, Search, Filter, MessageSquare, Check, ChevronsUpDown } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,8 +7,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import api from "../services/api"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+
+interface TeamShortInfo {
+  id: string
+  name: string
+}
+
+interface PlayerShortInfo {
+  id: string
+  name: string
+}
 
 interface Note {
   id: string
@@ -16,6 +28,8 @@ interface Note {
   role: string
   category: string
   rating?: number | null
+  teams?: TeamShortInfo[]
+  players?: PlayerShortInfo[]
   team_id?: string | null
   team_name?: string | null
   player_id?: string | null
@@ -44,10 +58,27 @@ export default function NotesBoard() {
   const [newNoteText, setNewNoteText] = useState("")
   const [newCategory, setNewCategory] = useState("general")
   const [newRating, setNewRating] = useState<number | null>(null)
-  const [noteTeamId, setNoteTeamId] = useState<string>("")
-  const [notePlayerId, setNotePlayerId] = useState<string>("")
+  
+  // Multi-select state
+  const [selectedTeamsList, setSelectedTeamsList] = useState<TeamShortInfo[]>([])
+  const [selectedPlayersList, setSelectedPlayersList] = useState<PlayerShortInfo[]>([])
+  
+  // Decoupled states for note creation dropdowns
+  const [teamToLinkId, setTeamToLinkId] = useState<string>("none")
+  const [teamForPlayerTemplateId, setTeamForPlayerTemplateId] = useState<string>("none")
+  const [playerToLinkId, setPlayerToLinkId] = useState<string>("none")
   const [teamPlayers, setTeamPlayers] = useState<any[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  // Popover open & search states for team selection
+  const [openTeamLinkPopover, setOpenTeamLinkPopover] = useState(false)
+  const [teamLinkSearch, setTeamLinkSearch] = useState("")
+
+  const [openTeamTemplatePopover, setOpenTeamTemplatePopover] = useState(false)
+  const [teamTemplateSearch, setTeamTemplateSearch] = useState("")
+
+  const [openTeamFilterPopover, setOpenTeamFilterPopover] = useState(false)
+  const [teamFilterSearch, setTeamFilterSearch] = useState("")
 
   // Filtering states
   const [searchQuery, setSearchQuery] = useState("")
@@ -66,7 +97,10 @@ export default function NotesBoard() {
   const loadTeams = async () => {
     try {
       const response = await api.get("/matches/teams")
-      setTeams(response.data || [])
+      const rawTeams = response.data || []
+      // Sort alphabetically by default
+      const sorted = [...rawTeams].sort((a: any, b: any) => a.name.localeCompare(b.name))
+      setTeams(sorted)
     } catch (error) {
       console.error("Failed to fetch teams", error)
     }
@@ -75,27 +109,48 @@ export default function NotesBoard() {
   // Fetch players for the note creation panel when team changes
   useEffect(() => {
     const fetchTeamPlayers = async () => {
-      if (!noteTeamId || noteTeamId === "none") {
+      if (!teamForPlayerTemplateId || teamForPlayerTemplateId === "none") {
         setTeamPlayers([])
-        setNotePlayerId("")
+        setPlayerToLinkId("none")
         return
       }
       try {
         const response = await api.get("/matches/players", {
-          params: { team_id: noteTeamId }
+          params: { team_id: teamForPlayerTemplateId }
         })
-        setTeamPlayers(response.data || [])
+        const rawPlayers = response.data || []
+        // Sort alphabetically by default
+        const sorted = [...rawPlayers].sort((a: any, b: any) => a.name.localeCompare(b.name))
+        setTeamPlayers(sorted)
       } catch (error) {
         console.error("Failed to fetch team players", error)
       }
     }
     fetchTeamPlayers()
-  }, [noteTeamId])
+  }, [teamForPlayerTemplateId])
 
   useEffect(() => {
     fetchNotes()
     loadTeams()
   }, [])
+
+  const handleAddTeam = (teamId: string) => {
+    if (teamId === "none" || !teamId) return
+    const teamObj = teams.find(t => t.id === teamId)
+    if (teamObj && !selectedTeamsList.some(t => t.id === teamId)) {
+      setSelectedTeamsList([...selectedTeamsList, { id: teamObj.id, name: teamObj.name }])
+    }
+    setTeamToLinkId("none") // reset selector to allow re-selection
+  }
+
+  const handleAddPlayer = (playerId: string) => {
+    if (playerId === "none" || !playerId) return
+    const playerObj = teamPlayers.find(p => p.id === playerId)
+    if (playerObj && !selectedPlayersList.some(p => p.id === playerId)) {
+      setSelectedPlayersList([...selectedPlayersList, { id: playerObj.id, name: playerObj.name }])
+    }
+    setPlayerToLinkId("none") // reset selector to allow re-selection
+  }
 
   const handlePostNote = async () => {
     if (!newNoteText.trim()) return
@@ -103,9 +158,9 @@ export default function NotesBoard() {
     const payload = {
       content: newNoteText,
       category: newCategory,
-      rating: newCategory === "scouting" || notePlayerId ? newRating : null,
-      team_id: noteTeamId && noteTeamId !== "none" ? noteTeamId : null,
-      player_id: notePlayerId && notePlayerId !== "none" ? notePlayerId : null
+      rating: newCategory === "scouting" || selectedPlayersList.length > 0 ? newRating : null,
+      team_ids: selectedTeamsList.map(t => t.id),
+      player_ids: selectedPlayersList.map(p => p.id)
     }
 
     try {
@@ -116,8 +171,11 @@ export default function NotesBoard() {
       setNewNoteText("")
       setNewCategory("general")
       setNewRating(null)
-      setNoteTeamId("")
-      setNotePlayerId("")
+      setTeamToLinkId("none")
+      setTeamForPlayerTemplateId("none")
+      setPlayerToLinkId("none")
+      setSelectedTeamsList([])
+      setSelectedPlayersList([])
       setIsDialogOpen(false)
       
       // Refresh list
@@ -147,10 +205,13 @@ export default function NotesBoard() {
   const filteredNotes = notes.filter((note) => {
     const matchesSearch = note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (note.player_name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (note.players || []).some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (note.author_name || "").toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesCategory = filterCategory === "all" || note.category === filterCategory
-    const matchesTeam = filterTeam === "all" || note.team_id === filterTeam
+    const matchesTeam = filterTeam === "all" || 
+      note.team_id === filterTeam || 
+      (note.teams || []).some(t => t.id === filterTeam)
 
     return matchesSearch && matchesCategory && matchesTeam
   })
@@ -201,28 +262,162 @@ export default function NotesBoard() {
                 </div>
 
                 {/* Team Association */}
-                <div className="space-y-2">
+                <div className="space-y-2 flex flex-col">
                   <label className="text-xs font-semibold text-muted-foreground uppercase">Asociar a Equipo</label>
-                  <Select value={noteTeamId} onValueChange={setNoteTeamId}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Ninguno" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Ninguno</SelectItem>
-                      {teams.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={openTeamLinkPopover} onOpenChange={setOpenTeamLinkPopover}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openTeamLinkPopover}
+                        className="w-full justify-between px-3 font-normal"
+                      >
+                        <span className="truncate">
+                          {teamToLinkId && teamToLinkId !== "none"
+                            ? teams.find((t) => t.id === teamToLinkId)?.name
+                            : "Selecciona Equipos..."}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[380px] p-2 bg-card border border-border shadow-lg rounded-md z-50" align="start">
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Buscar equipo..."
+                          value={teamLinkSearch}
+                          onChange={(e) => setTeamLinkSearch(e.target.value)}
+                          className="h-8 text-xs bg-background"
+                          autoFocus
+                        />
+                        <div className="max-h-[200px] overflow-y-auto space-y-0.5 pr-1">
+                          <button
+                            type="button"
+                            className={cn(
+                              "w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent flex items-center justify-between transition-colors",
+                              teamToLinkId === "none" && "bg-primary/10 text-primary font-bold"
+                            )}
+                            onClick={() => {
+                              setTeamToLinkId("none")
+                              setOpenTeamLinkPopover(false)
+                              setTeamLinkSearch("")
+                            }}
+                          >
+                            <span>Ninguno</span>
+                            {teamToLinkId === "none" && <Check className="h-3.5 w-3.5 text-primary" />}
+                          </button>
+                          {teams
+                            .filter((t) => t.name.toLowerCase().includes(teamLinkSearch.toLowerCase()))
+                            .map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                className={cn(
+                                  "w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent flex items-center justify-between transition-colors",
+                                  teamToLinkId === t.id && "bg-primary/10 text-primary font-bold"
+                                )}
+                                onClick={() => {
+                                  handleAddTeam(t.id)
+                                  setOpenTeamLinkPopover(false)
+                                  setTeamLinkSearch("")
+                                }}
+                              >
+                                <span className="truncate">{t.name}</span>
+                                {teamToLinkId === t.id && <Check className="h-3.5 w-3.5 text-primary" />}
+                              </button>
+                            ))}
+                          {teams.filter((t) => t.name.toLowerCase().includes(teamLinkSearch.toLowerCase())).length === 0 && (
+                            <div className="text-xs text-muted-foreground text-center py-3">
+                              No se encontró ningún equipo.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Team templates for Player selection */}
+                <div className="space-y-2 flex flex-col">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase">Cargar Plantilla de Equipo (para jugadores)</label>
+                  <Popover open={openTeamTemplatePopover} onOpenChange={setOpenTeamTemplatePopover}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openTeamTemplatePopover}
+                        className="w-full justify-between px-3 font-normal"
+                      >
+                        <span className="truncate">
+                          {teamForPlayerTemplateId && teamForPlayerTemplateId !== "none"
+                            ? teams.find((t) => t.id === teamForPlayerTemplateId)?.name
+                            : "Selecciona Equipo..."}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[380px] p-2 bg-card border border-border shadow-lg rounded-md z-50" align="start">
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Buscar equipo..."
+                          value={teamTemplateSearch}
+                          onChange={(e) => setTeamTemplateSearch(e.target.value)}
+                          className="h-8 text-xs bg-background"
+                          autoFocus
+                        />
+                        <div className="max-h-[200px] overflow-y-auto space-y-0.5 pr-1">
+                          <button
+                            type="button"
+                            className={cn(
+                              "w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent flex items-center justify-between transition-colors",
+                              teamForPlayerTemplateId === "none" && "bg-primary/10 text-primary font-bold"
+                            )}
+                            onClick={() => {
+                              setTeamForPlayerTemplateId("none")
+                              setOpenTeamTemplatePopover(false)
+                              setTeamTemplateSearch("")
+                            }}
+                          >
+                            <span>Ninguno</span>
+                            {teamForPlayerTemplateId === "none" && <Check className="h-3.5 w-3.5 text-primary" />}
+                          </button>
+                          {teams
+                            .filter((t) => t.name.toLowerCase().includes(teamTemplateSearch.toLowerCase()))
+                            .map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                className={cn(
+                                  "w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent flex items-center justify-between transition-colors",
+                                  teamForPlayerTemplateId === t.id && "bg-primary/10 text-primary font-bold"
+                                )}
+                                onClick={() => {
+                                  setTeamForPlayerTemplateId(t.id)
+                                  setOpenTeamTemplatePopover(false)
+                                  setTeamTemplateSearch("")
+                                }}
+                              >
+                                <span className="truncate">{t.name}</span>
+                                {teamForPlayerTemplateId === t.id && <Check className="h-3.5 w-3.5 text-primary" />}
+                              </button>
+                            ))}
+                          {teams.filter((t) => t.name.toLowerCase().includes(teamTemplateSearch.toLowerCase())).length === 0 && (
+                            <div className="text-xs text-muted-foreground text-center py-3">
+                              No se encontró ningún equipo.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Player Association */}
-                {noteTeamId && noteTeamId !== "none" && (
+                {teamForPlayerTemplateId && teamForPlayerTemplateId !== "none" && (
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Asociar a Jugador</label>
-                    <Select value={notePlayerId} onValueChange={setNotePlayerId}>
+                    <Select value={playerToLinkId} onValueChange={handleAddPlayer}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Ninguno" />
+                        <SelectValue placeholder="Selecciona Jugadores" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">Ninguno</SelectItem>
@@ -234,8 +429,50 @@ export default function NotesBoard() {
                   </div>
                 )}
 
+                {/* Badges of selected Teams */}
+                {selectedTeamsList.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase">Equipos Vinculados</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedTeamsList.map((t) => (
+                        <Badge key={t.id} variant="secondary" className="text-[10px] gap-1 bg-zinc-800 text-zinc-300 font-semibold py-0.5 px-2">
+                          🛡️ {t.name}
+                          <button 
+                            type="button" 
+                            onClick={() => setSelectedTeamsList(selectedTeamsList.filter(item => item.id !== t.id))}
+                            className="text-red-500 hover:text-red-400 font-bold ml-1"
+                          >
+                            x
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Badges of selected Players */}
+                {selectedPlayersList.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase">Jugadores Vinculados</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedPlayersList.map((p) => (
+                        <Badge key={p.id} variant="secondary" className="text-[10px] gap-1 bg-indigo-950/40 text-indigo-300 border-indigo-500/30 font-semibold py-0.5 px-2">
+                          👤 {p.name}
+                          <button 
+                            type="button" 
+                            onClick={() => setSelectedPlayersList(selectedPlayersList.filter(item => item.id !== p.id))}
+                            className="text-red-500 hover:text-red-400 font-bold ml-1"
+                          >
+                            x
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Rating (only for scouting or player specific notes) */}
-                {((newCategory === "scouting") || (notePlayerId && notePlayerId !== "none")) && (
+                {((newCategory === "scouting") || (selectedPlayersList.length > 0)) && (
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Evaluación (Estrellas)</label>
                     <div className="flex items-center gap-1">
@@ -318,17 +555,76 @@ export default function NotesBoard() {
             </Select>
           </div>
 
-          <Select value={filterTeam} onValueChange={setFilterTeam}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Todos los Equipos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los Equipos</SelectItem>
-              {teams.map((t) => (
-                <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={openTeamFilterPopover} onOpenChange={setOpenTeamFilterPopover}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openTeamFilterPopover}
+                className="w-full justify-between px-3 font-normal"
+              >
+                <span className="truncate">
+                  {filterTeam && filterTeam !== "all"
+                    ? teams.find((t) => t.id === filterTeam)?.name
+                    : "Todos los Equipos"}
+                </span>
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[280px] p-2 bg-card border border-border shadow-lg rounded-md z-50" align="start">
+              <div className="space-y-2">
+                <Input
+                  placeholder="Buscar equipo..."
+                  value={teamFilterSearch}
+                  onChange={(e) => setTeamFilterSearch(e.target.value)}
+                  className="h-8 text-xs bg-background"
+                  autoFocus
+                />
+                <div className="max-h-[200px] overflow-y-auto space-y-0.5 pr-1">
+                  <button
+                    type="button"
+                    className={cn(
+                      "w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent flex items-center justify-between transition-colors",
+                      filterTeam === "all" && "bg-primary/10 text-primary font-bold"
+                    )}
+                    onClick={() => {
+                      setFilterTeam("all")
+                      setOpenTeamFilterPopover(false)
+                      setTeamFilterSearch("")
+                    }}
+                  >
+                    <span>Todos los Equipos</span>
+                    {filterTeam === "all" && <Check className="h-3.5 w-3.5 text-primary" />}
+                  </button>
+                  {teams
+                    .filter((t) => t.name.toLowerCase().includes(teamFilterSearch.toLowerCase()))
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        className={cn(
+                          "w-full text-left px-2 py-1.5 text-xs rounded hover:bg-accent flex items-center justify-between transition-colors",
+                          filterTeam === t.id && "bg-primary/10 text-primary font-bold"
+                        )}
+                        onClick={() => {
+                          setFilterTeam(t.id)
+                          setOpenTeamFilterPopover(false)
+                          setTeamFilterSearch("")
+                        }}
+                      >
+                        <span className="truncate">{t.name}</span>
+                        {filterTeam === t.id && <Check className="h-3.5 w-3.5 text-primary" />}
+                      </button>
+                    ))}
+                  {teams.filter((t) => t.name.toLowerCase().includes(teamFilterSearch.toLowerCase())).length === 0 && (
+                    <div className="text-xs text-muted-foreground text-center py-3">
+                      No se encontró ningún equipo.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Card Grid Content */}
@@ -371,15 +667,25 @@ export default function NotesBoard() {
                     </div>
 
                     {/* Associated Entity Indicators */}
-                    {(note.team_name || note.player_name) && (
+                    {((note.teams && note.teams.length > 0) || (note.players && note.players.length > 0) || note.team_name || note.player_name) && (
                       <div className="flex flex-wrap gap-1.5 mb-2">
-                        {note.team_name && (
+                        {note.teams && note.teams.map((t) => (
+                          <Badge key={t.id} variant="secondary" className="text-[9px] bg-zinc-800 text-zinc-300 font-semibold py-0 px-1.5">
+                            🛡️ {t.name}
+                          </Badge>
+                        ))}
+                        {!note.teams && note.team_name && (
                           <Badge variant="secondary" className="text-[9px] bg-zinc-800 text-zinc-300 font-semibold py-0 px-1.5">
                             🛡️ {note.team_name}
                           </Badge>
                         )}
-                        {note.player_name && (
-                          <Badge variant="secondary" className="text-[9px] bg-zinc-800 text-zinc-300 font-semibold py-0 px-1.5">
+                        {note.players && note.players.map((p) => (
+                          <Badge key={p.id} variant="secondary" className="text-[9px] bg-indigo-950/40 text-indigo-300 border-indigo-500/20 font-semibold py-0 px-1.5">
+                            👤 {p.name}
+                          </Badge>
+                        ))}
+                        {!note.players && note.player_name && (
+                          <Badge variant="secondary" className="text-[9px] bg-indigo-950/40 text-indigo-300 border-indigo-500/20 font-semibold py-0 px-1.5">
                             👤 {note.player_name}
                           </Badge>
                         )}

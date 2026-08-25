@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import MatchResults from "@/components/match-results"
 import PredictionCard from "@/components/prediction-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { toast } from "sonner"
 
 import { useNavigate } from "react-router-dom"
@@ -14,8 +15,10 @@ import api, { getMe, getTeams, updateUserTeam, getNextMatchAnalysis } from '../s
 
 export default function SportsResultsPage() {
   const navigate = useNavigate()
+  const [selectedModel, setSelectedModel] = useState<"rf" | "nn">("rf")
   const [stats, setStats] = useState<any>({
-    accuracy: 0,
+    accuracy_rf: 0,
+    accuracy_nn: 0,
     played_count: 0,
     active_leagues: 0,
     feature_importances: {},
@@ -58,7 +61,8 @@ export default function SportsResultsPage() {
       const data = await getStatsData()
       if (data) {
         setStats({
-          accuracy: data.accuracy || 0,
+          accuracy_rf: data.accuracy_rf || 0,
+          accuracy_nn: data.accuracy_nn || 0,
           played_count: data.played_count || 0,
           active_leagues: data.active_leagues || 0,
           feature_importances: data.feature_importances || {},
@@ -91,7 +95,8 @@ export default function SportsResultsPage() {
     getStatsData().then(data => {
       if (data) {
         setStats({
-          accuracy: data.accuracy || 0,
+          accuracy_rf: data.accuracy_rf || 0,
+          accuracy_nn: data.accuracy_nn || 0,
           played_count: data.played_count || 0,
           active_leagues: data.active_leagues || 0,
           feature_importances: data.feature_importances || {},
@@ -146,16 +151,14 @@ export default function SportsResultsPage() {
                     Personaliza tu espacio de trabajo. Asocia tu perfil a tu club de fútbol para habilitar el motor de análisis del próximo rival, consejos estratégicos y la recomendación de formación de la IA.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 max-w-md pt-1">
-                    <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                      <SelectTrigger className="bg-background/50 border-border/80">
-                        <SelectValue placeholder="Selecciona tu club" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teams.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={teams}
+                      value={selectedTeam}
+                      onValueChange={setSelectedTeam}
+                      placeholder="Selecciona tu club"
+                      searchPlaceholder="Buscar club..."
+                      className="w-full sm:w-[240px]"
+                    />
                     <Button 
                       onClick={() => handleAssociateTeam(selectedTeam)} 
                       disabled={!selectedTeam || selectedTeam === "none_team" || associationLoading}
@@ -213,40 +216,58 @@ export default function SportsResultsPage() {
                       <CardContent className="pt-6 space-y-6">
                         {/* Versus display */}
                         <div className="flex items-center justify-around text-center">
+                          {/* Local Team */}
                           <div className="flex flex-col items-center gap-2 max-w-[100px] truncate">
-                            {user.team_id && teams.find(t => t.id === user.team_id)?.sofascore_id ? (
-                              <img
-                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${teams.find(t => t.id === user.team_id)?.sofascore_id}/image`}
-                                alt=""
-                                className="w-12 h-12 object-contain"
-                                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                              />
-                            ) : (
-                              <Shield className="w-12 h-12 text-muted-foreground/30" />
-                            )}
-                            <span className="text-xs font-black text-foreground truncate w-full">
-                              {teams.find(t => t.id === user.team_id)?.name || "Local"}
-                            </span>
+                            {(() => {
+                              const isOurHome = nextMatchAnalysis.match?.is_our_team_home;
+                              const teamToShow = isOurHome ? teams.find(t => t.id === user.team_id) : nextMatchAnalysis.opponent;
+                              return (
+                                <>
+                                  {teamToShow?.sofascore_id ? (
+                                    <img
+                                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${teamToShow.sofascore_id}/image`}
+                                      alt=""
+                                      className="w-12 h-12 object-contain"
+                                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                                    />
+                                  ) : (
+                                    <Shield className="w-12 h-12 text-muted-foreground/30" />
+                                  )}
+                                  <span className="text-xs font-black text-foreground truncate w-full">
+                                    {teamToShow?.name || "Local"}
+                                  </span>
+                                </>
+                              );
+                            })()}
                           </div>
                           
                           <div className="text-sm font-bold text-muted-foreground bg-secondary/30 px-3 py-1 rounded-full border border-border/20">
                             VS
                           </div>
                           
+                          {/* Visita Team */}
                           <div className="flex flex-col items-center gap-2 max-w-[100px] truncate">
-                            {nextMatchAnalysis.opponent?.sofascore_id ? (
-                              <img
-                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${nextMatchAnalysis.opponent.sofascore_id}/image`}
-                                alt=""
-                                className="w-12 h-12 object-contain"
-                                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                              />
-                            ) : (
-                              <Shield className="w-12 h-12 text-muted-foreground/30" />
-                            )}
-                            <span className="text-xs font-black text-foreground truncate w-full">
-                              {nextMatchAnalysis.opponent?.name}
-                            </span>
+                            {(() => {
+                              const isOurHome = nextMatchAnalysis.match?.is_our_team_home;
+                              const teamToShow = isOurHome ? nextMatchAnalysis.opponent : teams.find(t => t.id === user.team_id);
+                              return (
+                                <>
+                                  {teamToShow?.sofascore_id ? (
+                                    <img
+                                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/admin/sofascore/team/${teamToShow.sofascore_id}/image`}
+                                      alt=""
+                                      className="w-12 h-12 object-contain"
+                                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                                    />
+                                  ) : (
+                                    <Shield className="w-12 h-12 text-muted-foreground/30" />
+                                  )}
+                                  <span className="text-xs font-black text-foreground truncate w-full">
+                                    {teamToShow?.name || "Visita"}
+                                  </span>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
 
@@ -269,22 +290,40 @@ export default function SportsResultsPage() {
                         </div>
 
                         {/* Pronóstico IA */}
-                        {nextMatchAnalysis.prediction && (
+                        {nextMatchAnalysis.prediction?.[selectedModel] && (
                           <div className="border-t border-border/30 pt-4">
                             <div className="text-[10px] font-black uppercase text-muted-foreground tracking-wider mb-2">
                               Predicción IA del Resultado
                             </div>
-                            <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex items-center justify-between">
-                              <span className="text-xs font-semibold text-foreground">
-                                Probable {nextMatchAnalysis.prediction.result === 'Local' 
-                                  ? (nextMatchAnalysis.match?.home_team_id === user.team_id ? 'Victoria Nuestra' : 'Victoria Rival')
-                                  : nextMatchAnalysis.prediction.result === 'Visita'
-                                    ? (nextMatchAnalysis.match?.away_team_id === user.team_id ? 'Victoria Nuestra' : 'Victoria Rival')
-                                    : 'Empate'}
-                              </span>
-                              <span className="text-xs font-extrabold text-emerald-400 bg-emerald-400/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
-                                {nextMatchAnalysis.prediction.confidence}% Confianza
-                              </span>
+                            <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex flex-col gap-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-semibold text-foreground">
+                                  Probable {nextMatchAnalysis.prediction[selectedModel].result === 'Local' 
+                                    ? (nextMatchAnalysis.match?.is_our_team_home ? 'Victoria Nuestra' : 'Victoria Rival')
+                                    : nextMatchAnalysis.prediction[selectedModel].result === 'Visita'
+                                      ? (!nextMatchAnalysis.match?.is_our_team_home ? 'Victoria Nuestra' : 'Victoria Rival')
+                                      : 'Empate'}
+                                </span>
+                                <span className="text-xs font-extrabold text-emerald-400 bg-emerald-400/10 px-2.5 py-0.5 rounded border border-emerald-500/20">
+                                  {nextMatchAnalysis.prediction[selectedModel].confidence}% Confianza
+                                </span>
+                              </div>
+                              {nextMatchAnalysis.prediction[selectedModel].probabilities && (
+                                <div className="grid grid-cols-3 gap-2 mt-1">
+                                  <div className={`text-center p-1.5 rounded bg-card border ${nextMatchAnalysis.prediction[selectedModel].result === 'Local' ? 'border-primary/50 bg-primary/10' : 'border-border/30'}`}>
+                                    <div className="text-[9px] uppercase font-bold text-muted-foreground mb-0.5">Local</div>
+                                    <div className="text-xs font-black text-foreground">{nextMatchAnalysis.prediction[selectedModel].probabilities.Local}%</div>
+                                  </div>
+                                  <div className={`text-center p-1.5 rounded bg-card border ${nextMatchAnalysis.prediction[selectedModel].result === 'Empate' ? 'border-amber-500/50 bg-amber-500/10' : 'border-border/30'}`}>
+                                    <div className="text-[9px] uppercase font-bold text-muted-foreground mb-0.5">Empate</div>
+                                    <div className="text-xs font-black text-foreground">{nextMatchAnalysis.prediction[selectedModel].probabilities.Empate}%</div>
+                                  </div>
+                                  <div className={`text-center p-1.5 rounded bg-card border ${nextMatchAnalysis.prediction[selectedModel].result === 'Visita' ? 'border-sky-500/50 bg-sky-500/10' : 'border-border/30'}`}>
+                                    <div className="text-[9px] uppercase font-bold text-muted-foreground mb-0.5">Visita</div>
+                                    <div className="text-xs font-black text-foreground">{nextMatchAnalysis.prediction[selectedModel].probabilities.Visita}%</div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -296,7 +335,14 @@ export default function SportsResultsPage() {
                       <div>
                         <div className="p-4 border-b border-border/30 flex items-center justify-between">
                           <div>
-                            <div className="text-[10px] font-black uppercase tracking-wider text-primary">Sugerencia IA</div>
+                            <div className="text-[10px] font-black uppercase tracking-wider text-primary flex items-center gap-2">
+                              Sugerencia IA
+                              {nextMatchAnalysis.source && (
+                                <span className={`px-1.5 py-0.5 rounded-[4px] text-[8px] text-white ${nextMatchAnalysis.source.includes("Generativa") ? "bg-indigo-500" : "bg-amber-600"}`}>
+                                  {nextMatchAnalysis.source}
+                                </span>
+                              )}
+                            </div>
                             <div className="text-sm font-semibold text-foreground mt-0.5">Formación Recomendada</div>
                           </div>
                           <span className="text-xs font-black text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20">
@@ -370,16 +416,23 @@ export default function SportsResultsPage() {
           </div>
         )}
 
-        {/* Hero Stats */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Precisión del Modelo</CardTitle>
-              <Target className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm font-medium">Precisión del Modelo ML</CardTitle>
+              <Select value={selectedModel} onValueChange={(val: "rf"|"nn") => setSelectedModel(val)}>
+                <SelectTrigger className="w-[140px] h-7 text-xs">
+                  <SelectValue placeholder="Modelo..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rf">Random Forest</SelectItem>
+                  <SelectItem value="nn">Red Neuronal</SelectItem>
+                </SelectContent>
+              </Select>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">
-                {stats.accuracy ? `${(stats.accuracy * 100).toFixed(1)}%` : "0.0%"}
+                {stats[`accuracy_${selectedModel}`] ? `${(stats[`accuracy_${selectedModel}`] * 100).toFixed(1)}%` : "0.0%"}
               </div>
             </CardContent>
           </Card>
@@ -418,7 +471,7 @@ export default function SportsResultsPage() {
 
           {/* ML Predictions Sidebar */}
           <div className="space-y-6">
-            <PredictionCard onPredictionsUpdated={handlePredictionsUpdated} />
+            <PredictionCard selectedModel={selectedModel} onPredictionsUpdated={handlePredictionsUpdated} />
 
             {/* Model Metrics Card */}
             <Card className="border border-border/50 bg-card">
@@ -476,30 +529,30 @@ export default function SportsResultsPage() {
                 </div>
 
                 {/* Classification Report details */}
-                {stats.metrics && stats.metrics['accuracy'] !== undefined && (
+                {stats.metrics?.[selectedModel] && stats.metrics[selectedModel]['accuracy'] !== undefined && (
                   <div className="pt-4 border-t border-border/40">
                     <h4 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wider mb-2.5">
-                      Detalle de Precisión por Clase
+                      Detalle de Precisión por Clase ({selectedModel === "rf" ? "Random Forest" : "Red Neuronal"})
                     </h4>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="bg-secondary/20 p-2 rounded-lg border border-border/20">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase">Local</div>
                         <div className="text-sm font-black text-emerald-400 mt-0.5">
-                          {((stats.metrics['0']?.['f1-score'] || 0) * 100).toFixed(0)}%
+                          {((stats.metrics[selectedModel]['0']?.['f1-score'] || 0) * 100).toFixed(0)}%
                         </div>
                         <div className="text-[9px] text-muted-foreground">F1-Score</div>
                       </div>
                       <div className="bg-secondary/20 p-2 rounded-lg border border-border/20">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase">Empate</div>
                         <div className="text-sm font-black text-amber-400 mt-0.5">
-                          {((stats.metrics['1']?.['f1-score'] || 0) * 100).toFixed(0)}%
+                          {((stats.metrics[selectedModel]['1']?.['f1-score'] || 0) * 100).toFixed(0)}%
                         </div>
                         <div className="text-[9px] text-muted-foreground">F1-Score</div>
                       </div>
                       <div className="bg-secondary/20 p-2 rounded-lg border border-border/20">
                         <div className="text-[10px] font-bold text-muted-foreground uppercase">Visita</div>
                         <div className="text-sm font-black text-sky-400 mt-0.5">
-                          {((stats.metrics['2']?.['f1-score'] || 0) * 100).toFixed(0)}%
+                          {((stats.metrics[selectedModel]['2']?.['f1-score'] || 0) * 100).toFixed(0)}%
                         </div>
                         <div className="text-[9px] text-muted-foreground">F1-Score</div>
                       </div>

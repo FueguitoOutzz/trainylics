@@ -4,6 +4,7 @@ import { Trash2, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { getUsers, deleteUser, promoteUser, getMe, createUser, getTeams } from '../services/api'
 import { Button } from "@/components/ui/button"
+import { SearchableSelect } from "@/components/ui/searchable-select"
 import { toast } from "sonner"
 
 import {
@@ -42,7 +43,6 @@ export default function AdminUsers() {
   // Create User State
   const [createOpen, setCreateOpen] = useState(false)
   const [newUsername, setNewUsername] = useState('')
-  const [newEmail, setNewEmail] = useState('')
   const [newName, setNewName] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newRole, setNewRole] = useState('entrenador')
@@ -150,7 +150,6 @@ export default function AdminUsers() {
     try {
       await createUser({
         username: newUsername,
-        email: newEmail,
         name: newName,
         password: newPassword,
         role_name: newRole,
@@ -180,7 +179,6 @@ export default function AdminUsers() {
 
       setCreateOpen(false)
       setNewUsername('')
-      setNewEmail('')
       setNewName('')
       setNewPassword('')
       setNewTeamId('')
@@ -223,10 +221,6 @@ export default function AdminUsers() {
                       <Input id="username" required value={newUsername} onChange={e => setNewUsername(e.target.value)} />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Correo</Label>
-                      <Input id="email" type="email" required value={newEmail} onChange={e => setNewEmail(e.target.value)} />
-                    </div>
-                    <div className="grid gap-2">
                       <Label htmlFor="password">Contraseña Provisional</Label>
                       <div className="flex gap-2">
                         <Input id="password" required value={newPassword} onChange={e => setNewPassword(e.target.value)} className="flex-1" />
@@ -248,17 +242,13 @@ export default function AdminUsers() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="team">Asociar Equipo (Opcional)</Label>
-                      <Select value={newTeamId} onValueChange={setNewTeamId}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Ninguno" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none_team">Ninguno</SelectItem>
-                          {teams.map((t) => (
-                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect
+                        options={[{ id: "none_team", name: "Ninguno" }, ...teams]}
+                        value={newTeamId || "none_team"}
+                        onValueChange={setNewTeamId}
+                        placeholder="Ninguno"
+                        searchPlaceholder="Buscar equipo..."
+                      />
                     </div>
                   </div>
                   <DialogFooter>
@@ -280,7 +270,6 @@ export default function AdminUsers() {
             <TableHeader>
               <TableRow>
                 <TableHead>Usuario</TableHead>
-                <TableHead>Correo</TableHead>
                 <TableHead>Rol Actual</TableHead>
                 <TableHead>Cambiar Rol</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -293,7 +282,6 @@ export default function AdminUsers() {
                     {user.username}
                     {user.id === currentUser?.id && <span className="ml-2 text-xs text-muted-foreground">(Tú)</span>}
                   </TableCell>
-                  <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
                       {user.roles?.[0]?.role_name || "user"}
@@ -331,7 +319,7 @@ export default function AdminUsers() {
               ))}
               {users.length === 0 && !loading && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     No hay usuarios
                   </TableCell>
                 </TableRow>

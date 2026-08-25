@@ -44,7 +44,7 @@ class AdminService:
             
             _user = User(id=_user_id,
                         username=request.username,
-                        email=request.email,
+                        email=None,
                         password=pwd_context.hash(request.password),
                         person_id=_person_id,
                         team_id=request.team_id)
@@ -56,10 +56,6 @@ class AdminService:
             _username = await UserRepo.find_by_username(request.username)
             if _username:
                 raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
-            
-            _email = await UserRepo.find_by_email(request.email)
-            if _email:
-                raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
             
             await PersonRepo.create(**_person.dict())
             await UserRepo.create(**_user.dict())

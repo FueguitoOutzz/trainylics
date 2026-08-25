@@ -10,7 +10,7 @@ import api from '../services/api'
 
 export default function Register() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', email: '', password: '', name: '', phone_number: '', birth: '01-01-1990', sex: 'Hombre' })
+  const [form, setForm] = useState({ username: '', password: '', name: '', phone_number: '', birth: '01-01-1990', sex: 'Hombre' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -49,11 +49,6 @@ export default function Register() {
                 <Label htmlFor="name">Nombre</Label>
                 <Input placeholder="" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
               </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input type="email" placeholder="tecnico@gmail.com" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
             </div>
 
             <div className="grid gap-2">

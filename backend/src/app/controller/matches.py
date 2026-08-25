@@ -48,16 +48,71 @@ async def get_all_matches(session: AsyncSession = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/sync-league/{league_id}")
+async def sync_league_all_rounds(league_id: str, session: AsyncSession = Depends(get_db)):
+    """
+    Sincroniza manualmente las 30 jornadas de una liga.
+    """
+    try:
+        from sqlalchemy import select
+        from app.model.league import League
+        from app.service.sofascore import SofascoreService
+        
+        res = await session.execute(select(League).where(League.id == league_id))
+        league = res.scalars().first()
+        if not league:
+            raise HTTPException(status_code=404, detail="League not found")
+            
+        tournament_id, season_id = await SofascoreService.get_sofascore_ids(league.name, league.season)
+        if not tournament_id or not season_id:
+            raise HTTPException(status_code=400, detail="Could not resolve Sofascore IDs")
+            
+        synced_rounds = []
+        consecutive_empty = 0
+        import asyncio
+        for r in range(1, 31):
+            try:
+                results = await SofascoreService.sync_round(
+                    tournament_id=tournament_id,
+                    season_id=season_id,
+                    round_num=r,
+                    league_id=league_id
+                )
+                if not results:
+                    consecutive_empty += 1
+                else:
+                    synced_rounds.append(r)
+                    consecutive_empty = 0
+                
+                if consecutive_empty >= 3:
+                    break
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                print(f"Error syncing round {r}: {e}")
+                consecutive_empty += 1
+                if consecutive_empty >= 3:
+                    break
+                
+        await SofascoreService.sync_team_groups(tournament_id, season_id, league_id)
+        
+        return {"detail": f"Sincronización completada para la liga {league.name}", "synced_rounds": synced_rounds}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/round/{round_num}/predictions")
-async def get_round_predictions(round_num: int, session: AsyncSession = Depends(get_db)):
+async def get_round_predictions(round_num: int, league_id: Optional[str] = None, model: str = "rf", session: AsyncSession = Depends(get_db)):
     """
     Get matches for a specific round with ML predictions.
     """
     try:
-        from app.service.ml_service import predictor
+        from app.service.ml_service import predict_single_match
         from sqlalchemy.orm import selectinload
 
-        statement = select(Match).where(Match.round == round_num).options(
+        query = select(Match).where(Match.round == round_num)
+        if league_id:
+            query = query.where(Match.league_id == league_id)
+            
+        statement = query.options(
             selectinload(Match.home_team),
             selectinload(Match.away_team)
         )
@@ -66,24 +121,25 @@ async def get_round_predictions(round_num: int, session: AsyncSession = Depends(
         
         predictions = []
         for match in matches:
-            # Construct match_data from match object
             match_data = match.model_dump()
-            
-            # For round 30 (prediction), we logically treat results as unknown
             if round_num == 30:
                 match_data['home_goals'] = None
                 match_data['away_goals'] = None
 
-
-            # Predict
-            pred = predictor.predict(match_data)
+            pred_all = await predict_single_match(match, session)
+            pred = pred_all.get(model, pred_all.get("rf", {
+                "result": "Empate",
+                "accuracy": 0.33,
+                "probabilities": {"Local": 33.3, "Empate": 33.4, "Visita": 33.3}
+            }))
             
             predictions.append({
                 **match_data,
                 "home_team": match.home_team.model_dump() if match.home_team else None,
                 "away_team": match.away_team.model_dump() if match.away_team else None,
                 "prediction_result": pred["result"],
-                "prediction_accuracy": pred["accuracy"]
+                "prediction_accuracy": pred["accuracy"],
+                "prediction_probabilities": {k: round(v, 1) for k, v in pred.get("probabilities", {"Local": 33.3, "Empate": 33.3, "Visita": 33.3}).items()}
             })
             
         return predictions
@@ -91,13 +147,14 @@ async def get_round_predictions(round_num: int, session: AsyncSession = Depends(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/round/{round_num}/predict")
-async def generate_round_prediction(round_num: int, league_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
+async def generate_round_prediction(round_num: int, league_id: Optional[str] = None, model: str = "rf", session: AsyncSession = Depends(get_db)):
     """
     Train model on all played matches and predict for the specified round and league.
     """
     try:
-        from app.service.ml_service import predictor
+        from app.service.ml_service import predictor, predict_single_match
         from sqlalchemy.orm import selectinload
 
         # 1. Train on all previous data with valid results
@@ -115,7 +172,6 @@ async def generate_round_prediction(round_num: int, league_id: Optional[str] = N
         predictor.train(matches_data)
 
         # 2. Predict for target round
-        # Fetch target matches
         target_query = select(Match).where(Match.round == round_num)
         if league_id:
             target_query = target_query.where(Match.league_id == league_id)
@@ -131,18 +187,20 @@ async def generate_round_prediction(round_num: int, league_id: Optional[str] = N
         for match in target_matches:
             match_data = match.model_dump()
             
-            # Mask results for prediction context
-            match_data['home_goals'] = None
-            match_data['away_goals'] = None
-            
-            pred = predictor.predict(match_data)
+            pred_all = await predict_single_match(match, session)
+            pred = pred_all.get(model, pred_all.get("rf", {
+                "result": "Empate",
+                "accuracy": 0.33,
+                "probabilities": {"Local": 33.3, "Empate": 33.4, "Visita": 33.3}
+            }))
             
             predictions.append({
                 **match_data,
                 "home_team": match.home_team.model_dump() if match.home_team else None,
                 "away_team": match.away_team.model_dump() if match.away_team else None,
                 "prediction_result": pred["result"],
-                "prediction_accuracy": pred["accuracy"]
+                "prediction_accuracy": pred["accuracy"],
+                "prediction_probabilities": {k: round(v, 1) for k, v in pred.get("probabilities", {"Local": 33.3, "Empate": 33.3, "Visita": 33.3}).items()}
             })
             
         return predictions
@@ -281,11 +339,35 @@ async def get_all_leagues(session: AsyncSession = Depends(get_db)):
 async def get_all_teams(league_id: Optional[str] = None, session: AsyncSession = Depends(get_db)):
     try:
         from app.model.team import Team
-        statement = select(Team)
+        from sqlalchemy.orm import selectinload
+        statement = select(Team).options(selectinload(Team.league))
         if league_id:
             statement = statement.where(Team.league_id == league_id)
         result = await session.exec(statement)
-        return result.all()
+        teams = result.all()
+        
+        # Deduplicar equipos por nombre si no hay filtro de liga
+        if not league_id:
+            def get_season_year(t):
+                try:
+                    if t.league and t.league.season:
+                        return int(t.league.season)
+                except (ValueError, TypeError):
+                    pass
+                return 0
+            
+            # Ordenar de temporada más reciente a más antigua
+            teams = sorted(teams, key=get_season_year, reverse=True)
+            
+            seen_names = set()
+            unique_teams = []
+            for t in teams:
+                clean_name = t.name.strip().lower()
+                if clean_name not in seen_names:
+                    seen_names.add(clean_name)
+                    unique_teams.append(t)
+            return unique_teams
+        return teams
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -358,14 +440,59 @@ async def get_players(team_id: Optional[str] = None, session: AsyncSession = Dep
                 # No players in DB, auto sync from Sofascore if team has a sofascore_id
                 team_res = await session.exec(select(Team).where(Team.id == team_id))
                 team = team_res.first()
-                if team and team.sofascore_id:
-                    try:
-                        await SofascoreService.sync_roster(team.sofascore_id, team_id)
-                        # Re-query players after sync
-                        result = await session.exec(statement)
-                        players = result.all()
-                    except Exception as sync_err:
-                        print(f"Failed to auto-sync roster for team {team_id}: {sync_err}")
+                if team:
+                    team_sofascore_id = getattr(team, 'sofascore_id', None)
+                    if not team_sofascore_id:
+                        import unicodedata
+                        def clean_name(name: str) -> str:
+                            n = name.lower().strip()
+                            n = "".join(c for c in unicodedata.normalize('NFD', n) if unicodedata.category(c) != 'Mn')
+                            n = n.replace("-", " ").replace("'", "")
+                            return n
+                        
+                        TEAM_MAPPING = {
+                            3155: ["colo colo", "colo-colo"],
+                            3151: ["universidad catolica", "u. catolica", "u catolica", "universidad católica"],
+                            3165: ["coquimbo unido", "coquimbo"],
+                            5032: ["everton", "everton de viña del mar", "everton de vina del mar"],
+                            3164: ["huachipato"],
+                            331131: ["deportes limache", "limache"],
+                            3157: ["palestino"],
+                            7029: ["nublense", "ñublense"],
+                            48242: ["union la calera", "la calera", "unión la calera"],
+                            3160: ["deportes concepcion", "deportes concepción"],
+                            3167: ["cobresal"],
+                            3162: ["audax italiano", "audax"],
+                            5031: ["deportes la serena", "la serena"],
+                            5034: ["universidad de concepcion", "u. de concepcion", "universidad de concepción"],
+                            3163: ["ohiggins", "o'higgins", "o higgins"],
+                            3161: ["universidad de chile", "u. de chile", "u de chile"]
+                        }
+                        
+                        cleaned_team_name = clean_name(team.name)
+                        for sofascore_id, variations in TEAM_MAPPING.items():
+                            for var in variations:
+                                cleaned_var = clean_name(var)
+                                if cleaned_team_name == cleaned_var or cleaned_team_name in cleaned_var or cleaned_var in cleaned_team_name:
+                                    team_sofascore_id = sofascore_id
+                                    break
+                            if team_sofascore_id:
+                                break
+                        
+                        if team_sofascore_id:
+                            team.sofascore_id = team_sofascore_id
+                            session.add(team)
+                            await session.commit()
+                            await session.refresh(team)
+                    
+                    if team_sofascore_id:
+                        try:
+                            await SofascoreService.sync_roster(team_sofascore_id, team_id)
+                            # Re-query players after sync
+                            result = await session.exec(statement)
+                            players = result.all()
+                        except Exception as sync_err:
+                            print(f"Failed to auto-sync roster for team {team_id}: {sync_err}")
         else:
             statement = select(Player)
             result = await session.exec(statement)
@@ -529,4 +656,143 @@ async def get_team_stats(team_id: str, session: AsyncSession = Depends(get_db)):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/league/{league_id}/current_round")
+async def get_current_round(league_id: str, session: AsyncSession = Depends(get_db)):
+    """
+    Get the round of the match closest to today's date.
+    """
+    try:
+        from datetime import datetime
+        statement = select(Match.round, Match.date).where(Match.league_id == league_id)
+        result = await session.exec(statement)
+        matches = result.all()
+        if not matches:
+            return {"current_round": 1}
+        
+        now = datetime.now()
+        # Find match with minimum absolute difference from now
+        closest_match = min(matches, key=lambda m: abs((m.date - now).total_seconds()))
+        return {"current_round": closest_match.round}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/team/{team_id}/last-match-formation")
+async def get_last_match_formation(team_id: str, session: AsyncSession = Depends(get_db)):
+    try:
+        from app.model.team import Team
+        from app.service.sofascore import SofascoreService
+        import unicodedata
+
+        # 1. Fetch the team
+        team_res = await session.execute(select(Team).where(Team.id == team_id))
+        team = team_res.scalars().one_or_none()
+        if not team:
+            raise HTTPException(status_code=404, detail="Equipo no encontrado")
+
+        # 2. Helper to normalize team names for comparison
+        def clean_norm(name: str) -> str:
+            if not name: return ""
+            n = str(name).lower().strip()
+            n = "".join(c for c in unicodedata.normalize('NFD', n) if unicodedata.category(c) != 'Mn')
+            n = n.replace("-", " ").replace("'", "").replace(".", "")
+            words = n.split()
+            norm_words = []
+            for w in words:
+                if w in ["u", "univ", "universidad"]:
+                    norm_words.append("u")
+                elif w in ["catolica", "católica"]:
+                    norm_words.append("catolica")
+                elif w in ["concepcion", "concepción"]:
+                    norm_words.append("concepcion")
+                elif w in ["de", "del", "la", "las", "los", "el", "san", "santa"]:
+                    continue
+                else:
+                    norm_words.append(w)
+            return " ".join(norm_words)
+
+        all_teams_res = await session.execute(select(Team))
+        all_db_teams = all_teams_res.scalars().all()
+
+        target_norm = clean_norm(team.name)
+        target_sofascore_id = team.sofascore_id
+        matched_team_ids = set([str(team.id)])
+
+        for t in all_db_teams:
+            t_norm = clean_norm(t.name)
+            is_match = False
+            if target_sofascore_id and t.sofascore_id and t.sofascore_id == target_sofascore_id:
+                is_match = True
+            elif target_norm and t_norm and (target_norm == t_norm or target_norm in t_norm or t_norm in target_norm):
+                is_match = True
+            if is_match:
+                matched_team_ids.add(str(t.id))
+
+        # 3. Find the latest played match involving this team
+        stmt = (
+            select(Match)
+            .where((Match.home_team_id.in_(matched_team_ids)) | (Match.away_team_id.in_(matched_team_ids)))
+            .where(Match.home_goals != None)
+            .where(Match.away_goals != None)
+            .order_by(Match.date.desc())
+            .limit(1)
+        )
+        match_res = await session.execute(stmt)
+        last_match = match_res.scalars().first()
+
+        fallback_res = {
+            "match_id": None,
+            "opponent_name": None,
+            "is_home": True,
+            "date": None,
+            "formation": "4-3-3",
+            "players": []
+        }
+
+        if not last_match:
+            return fallback_res
+
+        # 4. Fetch lineups from Sofascore
+        lineups = await SofascoreService.fetch_match_lineup(last_match.id)
+        if not lineups:
+            return fallback_res
+
+        # Determine if target team is home or away in that match
+        is_home_side = (str(last_match.home_team_id) in matched_team_ids or last_match.home_team_id in matched_team_ids)
+        side_key = "home" if is_home_side else "away"
+        side_data = lineups.get(side_key, {})
+
+        formation = side_data.get("formation", "4-3-3")
+        raw_players = side_data.get("players", [])
+
+        formatted_players = []
+        for rp in raw_players:
+            p_info = rp.get("player", {})
+            substitute = rp.get("substitute", False)
+            # Only keep starters (non-substitute)
+            if not substitute:
+                formatted_players.append({
+                    "id": str(p_info.get("id", "")),
+                    "name": p_info.get("name", "Jugador"),
+                    "position": p_info.get("position", "Defensa"),
+                    "shirt_number": rp.get("shirtNumber", 0),
+                    "status": "Titular"
+                })
+
+        # Fetch opponent team name
+        opp_id = last_match.away_team_id if is_home_side else last_match.home_team_id
+        opp_res = await session.execute(select(Team).where(Team.id == opp_id))
+        opp_team = opp_res.scalars().first()
+
+        return {
+            "match_id": last_match.id,
+            "opponent_name": opp_team.name if opp_team else "Oponente",
+            "is_home": is_home_side,
+            "date": last_match.date.isoformat() if last_match.date else None,
+            "formation": formation,
+            "players": formatted_players
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 

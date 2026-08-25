@@ -254,14 +254,13 @@ export default function ClubsPage() {
         content: newNoteContent,
         category: newNoteCategory,
         rating: parseInt(newNoteRating) || null,
-        team_id: selectedTeam.id,
-        player_id: selectedPlayerId === "team" ? null : selectedPlayerId
+        team_ids: [selectedTeam.id],
+        player_ids: []
       }
       
       await api.post('/notes', payload)
       toast.success("Nota agregada correctamente")
       setNewNoteContent("")
-      setSelectedPlayerId("team")
       
       // Reload notes
       await loadTeamNotes(selectedTeam.id)
@@ -710,23 +709,6 @@ export default function ClubsPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-muted-foreground block">Vincular a:</label>
-                      <Select value={selectedPlayerId} onValueChange={setSelectedPlayerId}>
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="team" className="text-xs">Todo el Club ({selectedTeam.name})</SelectItem>
-                          {players.map(p => (
-                            <SelectItem key={p.id} value={p.id} className="text-xs">
-                              {p.name} ({p.position || "Jugador"})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
                     <Button type="submit" size="sm" className="w-full mt-2" disabled={submittingNote}>
                       {submittingNote ? (
                         <>
@@ -741,63 +723,63 @@ export default function ClubsPage() {
                   </form>
 
                   {/* List of notes */}
-                  <div className="space-y-3">
-                    <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground border-b pb-1">
-                      Historial de Notas ({notes.length})
-                    </h4>
-                    
-                    {loadingNotes ? (
-                      <div className="text-center py-6 text-muted-foreground flex justify-center items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        <span className="text-xs">Cargando historial...</span>
-                      </div>
-                    ) : notes.length === 0 ? (
-                      <div className="text-center py-10 text-muted-foreground text-xs">
-                        No hay notas registradas para este club.
-                      </div>
-                    ) : (
-                      <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
-                        {notes.map((note) => (
-                          <div key={note.id} className="p-3 border rounded-xl bg-card space-y-2 relative group/note">
-                            <div className="flex justify-between items-start">
-                              <div className="flex flex-wrap gap-1.5">
-                                <Badge variant="secondary" className="text-[9px] uppercase font-bold px-1.5">
-                                  {note.category}
-                                </Badge>
-                                {note.rating && (
-                                  <span className="text-amber-500 text-[10px] font-bold">
-                                    {"⭐".repeat(note.rating)}
-                                  </span>
-                                )}
-                                {note.player_name && (
-                                  <Badge variant="outline" className="text-[9px] font-semibold border-indigo-500/20 bg-indigo-500/5 text-indigo-400">
-                                    Vínculo: {note.player_name}
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {/* Delete button (only show to admin or note owner, but since user role check is in backend, let it be clickable) */}
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-6 w-6 opacity-0 group-hover/note:opacity-100 transition-opacity text-destructive hover:bg-destructive/10"
-                                onClick={() => handleDeleteNote(note.id)}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-
-                            <p className="text-xs text-foreground whitespace-pre-wrap">{note.content}</p>
-
-                            <div className="flex justify-between text-[9px] text-muted-foreground border-t pt-1.5 mt-1">
-                              <span>Por: {note.author_name || "Scouter"} ({note.role || "Entrenador"})</span>
-                              <span>{new Date(note.created_at).toLocaleDateString()}</span>
-                            </div>
+                  {(() => {
+                    const clubOnlyNotes = notes.filter(note => !note.player_id && (!note.players || note.players.length === 0));
+                    return (
+                      <div className="space-y-3">
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground border-b pb-1">
+                          Historial de Notas ({clubOnlyNotes.length})
+                        </h4>
+                        
+                        {loadingNotes ? (
+                          <div className="text-center py-6 text-muted-foreground flex justify-center items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            <span className="text-xs">Cargando historial...</span>
                           </div>
-                        ))}
+                        ) : clubOnlyNotes.length === 0 ? (
+                          <div className="text-center py-10 text-muted-foreground text-xs">
+                            No hay notas registradas para este club.
+                          </div>
+                        ) : (
+                          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            {clubOnlyNotes.map((note) => (
+                              <div key={note.id} className="p-3 border rounded-xl bg-card space-y-2 relative group/note">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex flex-wrap gap-1.5">
+                                    <Badge variant="secondary" className="text-[9px] uppercase font-bold px-1.5">
+                                      {note.category}
+                                    </Badge>
+                                    {note.rating && (
+                                      <span className="text-amber-500 text-[10px] font-bold">
+                                        {"⭐".repeat(note.rating)}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Delete button (only show to admin or note owner, but since user role check is in backend, let it be clickable) */}
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 opacity-0 group-hover/note:opacity-100 transition-opacity text-destructive hover:bg-destructive/10"
+                                    onClick={() => handleDeleteNote(note.id)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+
+                                <p className="text-xs text-foreground whitespace-pre-wrap">{note.content}</p>
+
+                                <div className="flex justify-between text-[9px] text-muted-foreground border-t pt-1.5 mt-1">
+                                  <span>Por: {note.author_name || "Scouter"} ({note.role || "Entrenador"})</span>
+                                  <span>{new Date(note.created_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
                 </TabsContent>
               </Tabs>
             </>

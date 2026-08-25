@@ -54,13 +54,14 @@ class AuthService:
             if _username:
                 raise HTTPException(status_code=400, detail="El nombre de usuario ya existe.")
             
-            _email = await UserRepo.find_by_email(register.email)
-            if _email:
-                raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
-            else:
-                await PersonRepo.create(**_person.dict())
-                await UserRepo.create(**_user.dict())
-                await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
+            if register.email:
+                _email = await UserRepo.find_by_email(register.email)
+                if _email:
+                    raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado.")
+            
+            await PersonRepo.create(**_person.dict())
+            await UserRepo.create(**_user.dict())
+            await UserRoleRepo.assign_role(user_id=_user_id, role_id=_role.id)
         except Exception as e:
             import traceback
             import sys
@@ -83,10 +84,10 @@ class AuthService:
     
     @staticmethod
     async def forgot_password_service(forgot_password: ForgotPasswordSchema):
-        _email = await UserRepo.find_by_email(forgot_password.email)
-        if not _email:
-            raise HTTPException(status_code=400, detail="El correo electrónico no está registrado.")
-        await UserRepo.update_password(_email.id, pwd_context.hash(forgot_password.new_password))
+        _user = await UserRepo.find_by_username(forgot_password.username)
+        if not _user:
+            raise HTTPException(status_code=400, detail="El nombre de usuario no está registrado.")
+        await UserRepo.update_password(_user.id, pwd_context.hash(forgot_password.new_password))
 
     @staticmethod
     async def logout_service():

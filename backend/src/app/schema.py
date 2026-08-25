@@ -14,7 +14,7 @@ logger = logging.getLogger("app.schema")
 
 class RegisterSchema(BaseModel):
     username: str
-    email: str
+    email: Optional[str] = None
     name: str
     password: str
     phone_number: str
@@ -36,13 +36,25 @@ class RegisterSchema(BaseModel):
             raise HTTPException(status_code=400, detail="Sexo inválido, usar Hombre o Mujer.")
         return v
     
+    @validator('username')
+    def validate_username(cls, v):
+        if len(v) < 3:
+            raise HTTPException(status_code=400, detail="El nombre de usuario debe tener al menos 3 caracteres.")
+        return v
+
+    @validator('password')
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres.")
+        return v
+    
     
 class LoginSchema(BaseModel):
     username: str
     password: str
     
 class ForgotPasswordSchema(BaseModel):
-    email: str
+    username: str
     new_password: str
 
 class DetailSchema(BaseModel):
@@ -69,7 +81,7 @@ class RoleSchema(BaseModel):
 class UserSchema(BaseModel):
     id: str
     username: str
-    email: str
+    email: Optional[str] = None
     roles: List[RoleSchema]
     class Config:
         from_attributes = True
@@ -79,11 +91,30 @@ class UserListResponse(BaseModel):
 
 class CreateUserRequest(BaseModel):
     username: str
-    email: str
     name: str
     password: str
     role_name: str
     team_id: Optional[str] = None
+
+    @validator('username')
+    def validate_username(cls, v):
+        if len(v) < 3:
+            raise HTTPException(status_code=400, detail="El nombre de usuario debe tener al menos 3 caracteres.")
+        if not v.isalnum() and "_" not in v and "-" not in v:
+            raise HTTPException(status_code=400, detail="El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.")
+        return v
+
+    @validator('password')
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise HTTPException(status_code=400, detail="La contraseña provisional debe tener al menos 6 caracteres.")
+        return v
+
+    @validator('name')
+    def validate_name(cls, v):
+        if len(v.strip()) < 2:
+            raise HTTPException(status_code=400, detail="El nombre completo debe tener al menos 2 caracteres.")
+        return v
 
 class UpdateProfileRequest(BaseModel):
     phone_number: str

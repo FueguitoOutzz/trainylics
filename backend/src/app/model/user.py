@@ -12,7 +12,7 @@ class User(SQLModel, TimeMixin, table=True):
 
     id: Optional[str] = Field(default_factory=lambda: str(uuid4()), primary_key=True, nullable=False)
     username: str = Field(sa_column=Column("username", String, unique=True))
-    email: str = Field(sa_column=Column("email", String, unique=True))
+    email: Optional[str] = Field(default=None, sa_column=Column("email", String, unique=True, nullable=True))
     password: str
 
     person_id: Optional[str] = Field(default=None, foreign_key="person.id")

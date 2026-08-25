@@ -2,6 +2,7 @@ from typing import Optional, List
 from uuid import uuid4
 from sqlmodel import SQLModel, Field, Relationship
 from app.model.mixins import TimeMixin
+from app.model.note import Recibe
 
 class Player(SQLModel, TimeMixin, table=True):
     __tablename__ = "player"
@@ -14,4 +15,4 @@ class Player(SQLModel, TimeMixin, table=True):
     team_id: Optional[str] = Field(default=None, foreign_key="team.id")
     team: Optional["Team"] = Relationship(back_populates="players")
     
-    notes: List["Note"] = Relationship(back_populates="player")
+    notes: List["Note"] = Relationship(back_populates="players", link_model=Recibe)

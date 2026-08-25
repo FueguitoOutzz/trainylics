@@ -14,6 +14,7 @@ Para facilitar la navegación del proyecto en GitHub, toda la documentación det
 *   ⚙️ **[commands.md](commands.md)**: Guía de comandos de sincronización Sofascore, migración de base de datos y scripts de mantenimiento.
 *   🎨 **[design_system.md](design_system.md)**: Especificaciones de diseño visual, clases CSS personalizadas, y paletas de colores del tema oscuro.
 *   📁 **[requirements_and_design.md](requirements_and_design.md)**: Requisitos del sistema, historias de usuario, diagramas de bases de datos y diccionario de datos.
+*   🗃️ **[database_design_mer_mr.md](database_design_mer_mr.md)**: Explicación académica y diagramación del Modelo Entidad-Relación (MER) y Modelo Relacional (MR) de la base de datos.
 *   🤖 **[machine_learning_history.md](machine_learning_history.md)**: Historial del entrenamiento de IA, matrices de confusión, precisión F1-score e importancia de variables del modelo.
 
 ---

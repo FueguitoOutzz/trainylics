@@ -1,4 +1,5 @@
 import sys
+# Force reload next-match logic uvicorn trigger
 import traceback
 from pathlib import Path
 
@@ -50,7 +51,6 @@ def init_app():
             status_code=500,
             content={"detail": f"INTERNAL SERVER ERROR: {str(exc)}"},
         )
-    
     @app.on_event("startup")
     async def startup():
         await db.create_all()
@@ -66,50 +66,43 @@ def init_app():
                 await session.execute(text("ALTER TABLE match ALTER COLUMN home_goals DROP NOT NULL"))
                 await session.execute(text("ALTER TABLE match ALTER COLUMN away_goals DROP NOT NULL"))
                 await session.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS team_id VARCHAR"))
+                
+                # Create table recibe if not exists
+                await session.execute(text("""
+                    CREATE TABLE IF NOT EXISTS recibe (
+                        note_id VARCHAR REFERENCES note(id) ON DELETE CASCADE,
+                        player_id VARCHAR REFERENCES player(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+                        PRIMARY KEY (note_id, player_id)
+                    )
+                """))
+                # Create table tiene if not exists
+                await session.execute(text("""
+                    CREATE TABLE IF NOT EXISTS tiene (
+                        note_id VARCHAR REFERENCES note(id) ON DELETE CASCADE,
+                        team_id VARCHAR REFERENCES team(id) ON DELETE CASCADE,
+                        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+                        PRIMARY KEY (note_id, team_id)
+                    )
+                """))
+                # Migrate existing player_id notes
+                await session.execute(text("""
+                    INSERT INTO recibe (note_id, player_id, created_at)
+                    SELECT id, player_id, created_at FROM note 
+                    WHERE player_id IS NOT NULL 
+                    ON CONFLICT DO NOTHING
+                """))
+                # Migrate existing team_id notes
+                await session.execute(text("""
+                    INSERT INTO tiene (note_id, team_id, created_at)
+                    SELECT id, team_id, created_at FROM note 
+                    WHERE team_id IS NOT NULL 
+                    ON CONFLICT DO NOTHING
+                """))
                 await session.commit()
             except Exception as e:
                 print(f"Migration error: {e}")
-        # Ensure compatible admin user exists
-        try:
-            from curl_cffi import requests
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            }
-            mappings = {
-                18834: {
-                    "2024": 58333,
-                    "2025": 68205,
-                    "2026": 86895
-                },
-                22063: {
-                    "2024": 58763,
-                    "2025": 70755,
-                    "2026": 91199
-                }
-            }
-            with open(r"c:\Users\renat\OneDrive\Desktop\trainylics\sofascore_tables_structure.txt", "w", encoding="utf-8") as f:
-                for t_id, seasons in mappings.items():
-                    for year, s_id in seasons.items():
-                        url = f"https://www.sofascore.com/api/v1/unique-tournament/{t_id}/season/{s_id}/standings/total"
-                        f.write(f"\n--- TOURNAMENT {t_id} | SEASON {s_id} ({year}) ---\n")
-                        try:
-                            r = requests.get(url, headers=headers, impersonate="chrome", timeout=15)
-                            if r.status_code == 200:
-                                data = r.json()
-                                standings = data.get("standings", [])
-                                f.write(f"Found {len(standings)} standings tables.\n")
-                                for idx, std in enumerate(standings):
-                                    name = std.get("name", "N/A")
-                                    group_info = std.get("group", {})
-                                    f.write(f"  Table {idx}: name='{name}', type='{std.get('type')}', group_name='{group_info.get('name') if group_info else None}', group_id='{group_info.get('id') if group_info else None}'\n")
-                                    rows = std.get("rows", [])
-                                    f.write(f"    Teams in table: {', '.join([row.get('team', {}).get('name') for row in rows])}\n")
-                            else:
-                                f.write(f"  Error fetching: {r.status_code}\n")
-                        except Exception as e2:
-                            f.write(f"  Request exception: {e2}\n")
-        except Exception as e:
-            print(f"Sofascore dump error: {e}")
+        # Startup initialized successfully
 
         await generate_role()
 
@@ -223,7 +216,7 @@ def init_app():
 
                     # Run background sync for all tournament data (Segunda, Tercera A, Tercera B 2024-2026)
                     try:
-                        print("Starting background sync for new tournaments (Segunda, Tercera A, Tercera B)...", flush=True)
+                        print("Starting background sync for new tournaments...", flush=True)
                         asyncio.create_task(SofascoreService.sync_new_tournaments_task())
                     except Exception as ex:
                         print(f"Error during background new tournament sync: {ex}", flush=True)
@@ -275,7 +268,12 @@ def init_app():
                                         )
                                         m_count = m_res.scalar()
                                         
-                                        lines.append(f"Liga: {l.name} | Temporada: {l.season} | Equipos: {t_count} | Partidos: {m_count}")
+                                        played_res = await session.execute(
+                                            select(func.count(Match.id)).where(Match.league_id == l.id, Match.home_goals.is_not(None))
+                                        )
+                                        played_count = played_res.scalar() or 0
+                                        
+                                        lines.append(f"Liga: {l.name} | Temporada: {l.season} | Equipos: {t_count} | Partidos: {m_count} | Jugados: {played_count}")
                                     
                                     with open(r"c:\Users\renat\OneDrive\Desktop\trainylics\sync_check_report.txt", "w", encoding="utf-8") as f:
                                         f.write("\n".join(lines))

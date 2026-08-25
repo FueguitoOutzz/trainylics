@@ -16,7 +16,6 @@ export default function Profile() {
   
   const [profileData, setProfileData] = useState({
     username: '',
-    email: '',
     name: '',
     phone_number: '',
     birth: '',
@@ -38,7 +37,6 @@ export default function Profile() {
         
         setProfileData({
           username: res.result.username || '',
-          email: res.result.email || '',
           name: res.result.name || '',
           phone_number: res.result.phone_number || '',
           birth: formattedBirth || '',
@@ -90,13 +88,9 @@ export default function Profile() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-2">
                 <Label>Usuario (No editable)</Label>
                 <Input value={profileData.username} disabled />
-              </div>
-              <div className="space-y-2">
-                <Label>Correo (No editable)</Label>
-                <Input value={profileData.email} disabled />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label>Nombre Completo (No editable)</Label>

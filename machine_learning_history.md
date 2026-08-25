@@ -105,3 +105,83 @@ Para dar mayor rigurosidad académica y soporte empírico en la tesis, se implem
    * `metrics`: El reporte de métricas detallado por clase (Local, Empate, Visita), incluyendo el F1-Score.
 3. **Entrenamiento en Startup:** Se configuró una rutina en el inicio del backend (`main.py`) que pre-entrena el modelo al arrancar el servidor FastAPI. Esto garantiza que las métricas visuales del dashboard se muestren de forma inmediata y actualizada al usuario desde el primer segundo.
 4. **Widget del Frontend (`Home.tsx`):** Un panel lateral renderiza barras de porcentaje dinámicas de la importancia de cada característica física/técnica del partido y desglosa la precisión (F1-score) por tipo de resultado. Esto permite al usuario y scouter entender *qué estadísticas influyen más* para que el modelo IA asigne una probabilidad de victoria.
+
+---
+
+## 5. El Asistente Táctico: IA Predictiva vs. Sistema Basado en Reglas
+
+Es importante distinguir entre la predicción del resultado del partido (que sí utiliza Machine Learning) y los **Consejos del Asistente IA / Formación Recomendada**, los cuales funcionan mediante un sistema de reglas (Rule-based System).
+
+* **Modelo ML (Random Forest):** Se usa de manera exclusiva para predecir si el partido terminará en Local, Empate o Visita, calculando una probabilidad matemática de confianza en base a 10 métricas.
+* **Motor de Consejos y Formación:** Analiza los promedios de los últimos 5 partidos del equipo y del rival, y mediante un conjunto de umbrales estáticos y condicionales lógicos (`if/else`), determina sugerencias de forma determinista.
+
+**Ejemplo de Reglas de Formación:**
+* Si el equipo posee más del 54% de posesión promedio -> Sugiere **4-3-3 Ofensivo** para someter al rival.
+* Si el rival tiene un xG o promedio de goles mayor a 1.6 -> Sugiere **4-4-2 Compacto** para defender y salir rápido.
+* Si no se cumple lo anterior -> Sugiere **4-2-3-1 Equilibrado**.
+
+**Ejemplo de Reglas Tácticas:**
+* Se comparan métricas como córners en contra, goles concedidos, y posesión del oponente con umbrales fijos (ej. > 5.5 córners) para sugerir cuidar el juego aéreo o la salida de balón. 
+
+Este enfoque mixto permite ofrecer tanto probabilidades estadísticas de Machine Learning (para el resultado) como *insights* tácticos inmediatos, legibles y directamente aplicables (mediante el sistema basado en reglas).
+
+---
+
+## 6. Documentación Técnica de los Modelos de Machine Learning
+
+Trainylics entrena y compara en paralelo dos algoritmos supervisados de clasificación multiclasificación para pronosticar los resultados (Victoria Local, Empate, Victoria Visitante):
+
+### A. Random Forest Classifier (Bosque Aleatorio)
+* **Tipo**: Algoritmo de ensamble basado en árboles de decisión (Bagging).
+* **Parámetros y Configuración**:
+  * `n_estimators=100`: Entrena 100 árboles de decisión independientes para promediar la varianza y reducir el sobreajuste (overfitting).
+  * `random_state=42`: Asegura la reproducibilidad de los resultados y divisiones del conjunto de entrenamiento.
+* **Lógica Operativa**: Cada árbol de decisión realiza divisiones basándose en un subconjunto aleatorio de características (features). El resultado final se obtiene por votación mayoritaria del ensamble.
+* **Ventajas**:
+  * **Explicabilidad**: Permite calcular la importancia de las características (`feature_importances_`), identificando qué estadísticas físicas/tácticas son más críticas.
+  * **Estabilidad**: Es altamente robusto frente a ruido y valores atípicos (outliers) en las estadísticas de los partidos.
+
+### B. Multi-Layer Perceptron Classifier (Red Neuronal / NN)
+* **Tipo**: Red Neuronal Artificial de tipo Feedforward entrenada con Backpropagation.
+* **Parámetros y Configuración**:
+  * `hidden_layer_sizes=(64, 32)`: Consta de una capa de entrada de 10 características, una primera capa oculta con **64 neuronas**, una segunda capa oculta con **32 neuronas** y una capa de salida con **3 neuronas** (Local, Empate, Visita).
+  * `max_iter=500`: Límite máximo de 500 épocas de entrenamiento para asegurar la convergencia del optimizador.
+  * `random_state=42`: Controla la inicialización de los pesos y bias de la red para reproducibilidad.
+* **Lógica Operativa**: Las entradas fluyen hacia adelante a través de las funciones de activación no lineales (ReLU). El error se calcula mediante la función de pérdida de entropía cruzada y se propaga hacia atrás (Backpropagation) para actualizar los pesos de las neuronas usando el optimizador Adam.
+* **Ventajas**:
+  * **Modelado Complejo**: Capaz de modelar relaciones matemáticas altamente complejas y no lineales entre combinaciones de tiros, posesión y xG que un árbol individual o lineal podría ignorar.
+
+---
+
+## 7. Comparativa de Rendimiento Real (Métricas de Base de Datos)
+
+A continuación se detalla la comparativa real obtenida tras entrenar los modelos sobre un dataset de **3,989 partidos oficiales** en la base de datos y validando sobre un conjunto de prueba estratificado de **798 partidos**:
+
+### Resumen General de Precisión (Accuracy)
+
+| Modelo | Precisión General (Accuracy) | Muestras de Entrenamiento | Muestras de Validación |
+| :--- | :---: | :---: | :---: |
+| **Random Forest (RF)** | **54.6%** | 3,191 partidos | 798 partidos |
+| **Red Neuronal (NN)** | **54.4%** | 3,191 partidos | 798 partidos |
+
+*Nota: Ambos modelos muestran una precisión sumamente pareja en la Liga Chilena, con una leve ventaja del 0.2% a favor de Random Forest en la general.*
+
+### Desglose por Clase (Local, Empate, Visita)
+
+Las métricas detalladas de precisión (precision), sensibilidad (recall) y puntuación F1 (F1-score) por cada clase revelan el comportamiento específico de cada modelo:
+
+#### 1. Random Forest (RF)
+* **Local (0)**: Precisión = 53.3% | Recall = 92.4% | **F1-Score = 67.6%**
+* **Empate (1)**: Precisión = 47.6% | Recall = 10.9% | **F1-Score = 17.8%**
+* **Visita (2)**: Precisión = 64.9% | Recall = 30.2% | **F1-Score = 41.2%**
+
+#### 2. Red Neuronal (NN)
+* **Local (0)**: Precisión = 52.8% | Recall = 94.9% | **F1-Score = 67.8%**
+* **Empate (1)**: Precisión = 44.4% | Recall = 4.4% | **F1-Score = 8.0%**
+* **Visita (2)**: Precisión = 65.2% | Recall = 30.6% | **F1-Score = 41.7%**
+
+### Análisis de Resultados
+1. **Predicción del Empate (Clase 1)**: Es la clase más compleja de clasificar para ambos modelos debido a su baja frecuencia relativa y a que sus características estadísticas se solapan con victorias ajustadas. La **Red Neuronal tiene un rendimiento más bajo en empates** (F1 de 8.0% contra 17.8% de RF), tendiendo a sesgarse más hacia victorias locales o visitantes claras.
+2. **Predicción de Victoria Local (Clase 0)**: Ambos modelos son excelentes identificando victorias locales (Recall superior al 92%), capturando la gran ventaja de localía imperante en la liga de fútbol chilena.
+3. **Predicción de Victoria Visitante (Clase 2)**: Ambos modelos logran una alta precisión al pronosticar victorias visitantes (aprox. 65%), lo que significa que cuando predicen que el visitante ganará, el nivel de acierto es muy alto.
+

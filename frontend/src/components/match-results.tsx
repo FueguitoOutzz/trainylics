@@ -28,9 +28,12 @@ interface Match {
   shots_on_target_home?: number
   shots_on_target_away?: number
   corners_home?: number
-  corners_away?: number
   xg_home?: number
   xg_away?: number
+  
+  prediction_result?: string
+  prediction_accuracy?: number
+  prediction_probabilities?: { Local: number, Empate: number, Visita: number }
 }
 
 function StatRow({ label, home, away, isPercent = false }: { label: string, home?: number, away?: number, isPercent?: boolean }) {
@@ -59,10 +62,11 @@ export default function MatchResults() {
   const [selectedRound, setSelectedRound] = useState("1")
   const [leagues, setLeagues] = useState<any[]>([])
   
-  // New split selectors
   const [selectedLiga, setSelectedLiga] = useState("Liga de Primera")
   const [selectedYear, setSelectedYear] = useState("2026")
   const [activeTab, setActiveTab] = useState<"results" | "standings">("results")
+  const [currentRound, setCurrentRound] = useState<number>(1)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const loadLeagues = async () => {
@@ -110,23 +114,50 @@ export default function MatchResults() {
     }
   }, [maxRounds, selectedRound])
 
-  const fetchMatches = async (round: string, leagueId: string) => {
+  // Fetch current round
+  useEffect(() => {
+    if (!selectedLeagueId) return
+    const fetchCurrentRound = async () => {
+      try {
+        const response = await api.get(`/matches/league/${selectedLeagueId}/current_round`)
+        if (response.data?.current_round) {
+          setCurrentRound(response.data.current_round)
+          setSelectedRound(response.data.current_round.toString())
+        }
+      } catch (err) {
+        console.error("Failed to fetch current round", err)
+      }
+    }
+    fetchCurrentRound()
+  }, [selectedLeagueId])
+
+  const fetchMatches = async (round: string, leagueId: string, current: number) => {
     if (!leagueId) return
+    setLoading(true)
     try {
-      const response = await api.get(`/matches/round/${round}`, {
-        params: { league_id: leagueId }
-      })
+      const roundNum = parseInt(round)
+      let response
+      
+      if (roundNum < current) {
+        // Historial
+        response = await api.get(`/matches/round/${round}/predictions`, { params: { league_id: leagueId } })
+      } else {
+        // Auto-generar para jornada actual y futuras sin bloqueo
+        response = await api.post(`/matches/round/${round}/predict`, null, { params: { league_id: leagueId } })
+      }
       setMatches(response.data || [])
     } catch (error) {
       console.error("Failed to fetch matches", error)
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    if (selectedLeagueId) {
-      fetchMatches(selectedRound, selectedLeagueId)
+    if (selectedLeagueId && currentRound) {
+      fetchMatches(selectedRound, selectedLeagueId, currentRound)
     }
-  }, [selectedRound, selectedLeagueId])
+  }, [selectedRound, selectedLeagueId, currentRound])
 
   // Unique league names and seasons for select fields
   const availableLigas = Array.from(new Set(leagues.map(l => l.name))).sort()
@@ -206,7 +237,12 @@ export default function MatchResults() {
       <CardContent className="pt-6">
         {activeTab === "results" ? (
           <div className="space-y-4">
-            {matches.length === 0 ? (
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+                <p>Cargando partidos y predicciones...</p>
+              </div>
+            ) : matches.length === 0 ? (
               <p className="text-muted-foreground text-center py-6">No hay partidos para esta combinación de liga, año y jornada.</p>
             ) : (
               matches.map((match) => {
@@ -336,7 +372,26 @@ export default function MatchResults() {
                           </div>
                         )}
 
-                        <div className="mt-3 text-center border-t border-border/50 pt-2">
+                        {!isFinished && match.prediction_probabilities && (
+                          <div className="mt-4 pt-3 border-t border-border/40">
+                            <div className="text-[10px] font-black uppercase text-muted-foreground tracking-wider mb-2 text-center">
+                              Predicción IA
+                            </div>
+                            <div className="flex w-full gap-2">
+                              <div className={`flex-1 text-center py-1.5 rounded-md text-xs font-bold transition-all ${match.prediction_result === 'Local' ? 'bg-primary/20 text-primary border border-primary/30 shadow-sm' : 'bg-secondary/50 text-muted-foreground border border-border/30'}`}>
+                                L: {match.prediction_probabilities.Local}%
+                              </div>
+                              <div className={`flex-1 text-center py-1.5 rounded-md text-xs font-bold transition-all ${match.prediction_result === 'Empate' ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30 shadow-sm' : 'bg-secondary/50 text-muted-foreground border border-border/30'}`}>
+                                E: {match.prediction_probabilities.Empate}%
+                              </div>
+                              <div className={`flex-1 text-center py-1.5 rounded-md text-xs font-bold transition-all ${match.prediction_result === 'Visita' ? 'bg-sky-500/20 text-sky-500 border border-sky-500/30 shadow-sm' : 'bg-secondary/50 text-muted-foreground border border-border/30'}`}>
+                                V: {match.prediction_probabilities.Visita}%
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mt-4 text-center border-t border-border/50 pt-2">
                           <span className="text-xs text-muted-foreground hover:text-primary transition-colors underline decoration-dotted">Ver Estadísticas Detalladas</span>
                         </div>
                       </div>
